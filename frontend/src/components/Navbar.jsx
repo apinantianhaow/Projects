@@ -13,7 +13,7 @@ function Navbar() {
         <input
           type="text"
           placeholder="type to search"
-          className="w-100 px-4 py-1 border-none rounded-md ml-[10px]
+          className="w-100 px-6 py-1 border-none rounded-md ml-[10px]
                      focus:outline-none"
         />
         <div className="flex">

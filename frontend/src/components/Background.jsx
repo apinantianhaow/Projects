@@ -3,7 +3,7 @@ import React from "react";
 function Background() {
   return (
     <div className="text-left">
-      <div className="bg-black w-full h-[87px] mt-1"></div>
+      <div className="bg-black w-full h-[87px] mt-1.5"></div>
       <div className="mt-[50px] ml-[63px]">
         <h1 className="text-[80px] font-kaisei">
           TRADE WHAT YOU HAVE, <br /> GET WHAT YOU WANT
