@@ -1,5 +1,5 @@
-/* @import url('./App.css'); */
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Kaisei+HarunoUmi:wght@400;700&display=swap');
 
 html, body {
   height: 100%;
@@ -15,4 +15,8 @@ html, body {
 
 .container {
   flex: 1;
+}
+
+.font-kaisei {
+  font-family: 'Kaisei HarunoUmi', serif;
 }
