@@ -2,7 +2,7 @@ import React from "react";
 
 function Navbar() {
   return (
-    <navbar className="bg-white w-full h-20 flex justify-between items-center px-4">
+    <div className="bg-white w-full h-20 flex justify-between items-center px-4">
       <div className="flex">
         <div>
           <img
@@ -50,7 +50,7 @@ function Navbar() {
           Register
         </button>
       </div>
-    </navbar>
+    </div>
   );
 }
 
