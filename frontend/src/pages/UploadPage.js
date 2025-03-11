@@ -9,4 +9,5 @@ const UploadPage = () => {
         </div>
     );
 };
+
 export default UploadPage;
