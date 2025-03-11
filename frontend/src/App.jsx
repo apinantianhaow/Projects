@@ -1,17 +1,14 @@
 import React from "react";
-import Navbar from "./components/Navbar";
-import Background from "./components/Background";
-import Category from "./components/Category";
-import Footer from "./components/Footer";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Firstpages from "./pages/Firstpages";
 
 function App() {
   return (
-    <div>
-      <Navbar />
-      <Background />
-      <Category />
-      <Footer />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Firstpages />} />
+      </Routes>
+    </Router>
   );
 }
 
