@@ -1,0 +1,273 @@
+/* รีเซ็ตค่าพื้นฐาน */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 🔹 จัด Header ด้านบน 🔹 */
+.top-bar {
+    display: flex;
+    width: 100%;
+    height: 120px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.search {
+    padding-left: 40px;
+    display: flex;
+    font-size: 24px;
+    gap: 30px;
+}
+
+.search p {
+    font-size: 24px;
+    font-family: 'Inter', sans-serif;
+    color: rgba(0, 0, 0, 0.25);
+}
+
+.profile {
+    padding-right: 40px;
+    display: flex;
+    gap: 30px;
+}
+
+.Home {
+    width: 100%;
+    background-color: black;
+    display: flex;
+    height: 87px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.Home a {
+    color: white;
+    text-decoration: none;
+    font-size: 40px;
+    font-family: 'Judson', serif;
+    font-weight: 400;
+    padding: 50px;
+}
+
+.back_icon {
+    width: 44px;
+    height: 44px;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+    max-width: 2000px;
+    margin-top: 120px;
+
+}
+
+
+section {
+    display: flex;
+    flex-direction: row; /* div (รูปเล็ก) อยู่ซ้าย, exam1 อยู่ขวา */
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    max-width: 2000px;
+    margin-left: 60px;
+    padding: 20px;
+}
+
+
+.exam1 {
+    max-width: 100%;
+    width: 700px;
+    height: auto;
+    border-radius: 20px;
+}
+
+
+section div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start; 
+    align-self: flex-start; 
+}
+
+section div img {
+    width: 120px;
+    height: 120px;
+    border-radius: 20px;
+}
+
+.information {
+    margin-top: 100px;
+    flex-basis: 35%;
+    max-width: 1200px;
+    margin-left: 50px;
+}
+
+
+.Goods {
+    font-size: 55px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 1);
+}
+
+.description, .category, .condition, .desired-items {
+    font-size: 35px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    color: rgb(0, 0, 0);
+    margin-top: 40px;
+    line-height: 1.5;
+}
+aside p{
+    font-size: 25px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    color: rgb(0, 0, 0);
+    line-height: 1.5;
+}
+
+
+.collectibles {
+    background-color: rgba(229, 240, 255, 0.61);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 20px;
+    width: 350px;
+    border-radius: 20px;
+    margin-top: 20px;
+}
+
+.collectibles p {
+    font-size: 25px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    color: rgb(0, 0, 0);
+    line-height: 1.5;
+    flex-basis: 100%;
+}
+h6{
+    font-size: 30px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    color: rgb(0, 0, 0);
+}
+
+.desired-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.Bookmark {
+    width: 37px;
+    height: 37px;
+}
+
+
+article {
+    width: 100%;
+    padding: 40px;
+}
+
+article h1 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 35px;
+    padding-left: 210px;
+}
+
+.trade_by {
+    margin-top: 40px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    padding-left: 210px;
+}
+
+
+.name {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    margin-left: 20px;
+    font-size: 25px;
+}
+
+
+.Message {
+    width: 40px;
+    height: 40px;
+}
+
+/* 🔹 Responsive Design 🔹 */
+@media (max-width: 1024px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .information {
+        width: 90%;
+        text-align: center;
+    }
+
+    .exam1 {
+        width: 80%;
+    }
+
+    section div img {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+@media (max-width: 768px) {
+    section {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    section div {
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+
+    section div img {
+        width: 80px;
+        height: 80px;
+    }
+
+    .exam1 {
+        width: 90%;
+    }
+
+    .information {
+        width: 100%;
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .exam1 {
+        width: 95%;
+    }
+
+    section div img {
+        width: 60px;
+        height: 60px;
+    }
+
+    .information {
+        width: 100%;
+        text-align: center;
+    }
+}
