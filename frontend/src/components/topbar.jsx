@@ -23,7 +23,7 @@ function Topbar() {
         />
         <input
           type="text"
-          placeholder="Type to search"
+          placeholder="type to search"
           style={{
             width: "200px",
             padding: "6px",
