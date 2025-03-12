@@ -65,7 +65,7 @@ function Sign() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-
+          
           <button 
             className="w-full bg-[#2C2C2C] text-white py-2 rounded-lg hover:bg-[#2C2C2C] transition duration-300 mt-6"
             onClick={handleSignIn}

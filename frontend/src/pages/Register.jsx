@@ -79,14 +79,16 @@ function Register() {
             style={{
               backgroundColor: "#2C2C2C",
             }}
+
             className="w-full text-white py-2 rounded-lg hover:bg-[#2C2C2C] transition duration-300"
-            onClick={handleRegister}
+            onClick={handleRegister}          
           >
             Register
           </button>
           {message && <p className={`mt-4 text-center ${message === "Error please try again" ? "text-red-600" : "text-green-600"}`}>{message}</p>}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
