@@ -15,8 +15,7 @@ function Topbar() {
         flexWrap: "nowrap",
       }}
     >
-      {/* Search Section */}
-      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>  {/* Search Section */}
         <img
           src="/src/assets/icons/Search Normal.png"
           alt="find_icon"
@@ -35,8 +34,7 @@ function Topbar() {
         />
       </div>
 
-      {/* Profile Section */}
-      <div style={{ display: "flex", alignItems: "center", gap: "50px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "50px" }}>  {/* Profile Section */}
         <img
           src="/src/assets/icons/Heart.png"
           alt="favorite_icon"
