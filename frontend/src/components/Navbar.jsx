@@ -39,6 +39,7 @@ function Navbar() {
             backgroundColor: "#E3E3E3",
             borderColor: "#767676",
             color: "#1E1E1E",
+            cursor: "pointer",
           }}
           className="w-40 h-[30px] font-bold text-[14px] text-center rounded-[8px] 
                      mr-[8px] border-[1px] flex items-center justify-center 
@@ -53,6 +54,7 @@ function Navbar() {
             backgroundColor: "#2C2C2C",
             borderColor: "#2C2C2C",
             color: "#F5F5F5",
+            cursor: "pointer",
           }}
           className="w-40 h-[30px] font-bold text-[14px] text-center rounded-[8px] 
                      mr-[20px] border-[1px] flex items-center justify-center 

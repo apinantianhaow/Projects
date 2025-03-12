@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Sign from "./pages/Sign";
 import CategoryPage from "./pages/CategoryPage";
+import Information from "./pages/information";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/sign" element={<Sign />} />
         <Route path="/category/:category" element={<CategoryPage />} />
+        <Route path="/information" element={<Information />} />
       </Routes>
     </Router>
   );

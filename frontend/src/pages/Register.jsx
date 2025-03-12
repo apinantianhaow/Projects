@@ -46,12 +46,13 @@ function Register() {
             style={{
               backgroundColor: "#2C2C2C",
             }}
-            className="w-full text-white py-2 rounded-lg hover:bg-[#2C2C2C] transition duration-300"
+            className="w-full text-white py-2 rounded-lg hover:bg-[#2C2C2C] transition duration-300 cursor-pointer"
           >
             Register
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
