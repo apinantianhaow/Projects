@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Topbar from "../components/topbar";
+import Topbar from "../components/Topbar";
 import Background2 from "../components/Background2";
 import Footer from "../components/Footer";
 
@@ -76,7 +76,7 @@ function Information() {
       lineHeight: "1.5",
       display: "inline-flex",
       alignItems: "center",
-      gap: "8px"
+      gap: "8px",
     },
     textParagraph: {
       fontSize: "25px",
@@ -141,7 +141,11 @@ function Information() {
                 src={imgSrc}
                 alt="thumbnail"
                 onClick={() => changeImage(imgSrc)}
-                style={mainImage === imgSrc ? { ...styles.sectionImg, ...styles.activeImage } : styles.sectionImg}
+                style={
+                  mainImage === imgSrc
+                    ? { ...styles.sectionImg, ...styles.activeImage }
+                    : styles.sectionImg
+                }
               />
             ))}
           </div>
@@ -154,25 +158,40 @@ function Information() {
           <h1 style={styles.goods}>Kate Domina Art</h1>
           <h2 style={styles.textHeader}>Description</h2>
           <p style={styles.textParagraph}>
-            Was purchased at an Art Battle Championship night on June 24th, 2014.
-            It was painted by Kate Domina, whose pieces now fetch between $1000-$3500.
+            Was purchased at an Art Battle Championship night on June 24th,
+            2014. It was painted by Kate Domina, whose pieces now fetch between
+            $1000-$3500.
           </p>
           <h3 style={styles.textHeader}>Category</h3>
           <p style={styles.textParagraph}>Art & Handmade</p>
           <h4 style={styles.textHeader}>
-            Condition <img src="/src/assets/icons/circle.png" alt="circle" style={styles.circle} />
+            Condition{" "}
+            <img
+              src="/src/assets/icons/circle.png"
+              alt="circle"
+              style={styles.circle}
+            />
           </h4>
           <p style={styles.textParagraph}>
-            Lightly used and fully functional, but does not include the original packaging or tags.
+            Lightly used and fully functional, but does not include the original
+            packaging or tags.
           </p>
 
           {/* รายการสินค้าที่ต้องการแลกเปลี่ยน */}
           <div>
             <h5 style={styles.textHeader}>Desired Items</h5>
             <div style={styles.collectibles}>
-              <img src="/src/assets/icons/Bookmark 2.png" alt="Bookmark" style={{ width: "37px", height: "37px" }} />
-              <h6 style={{ fontSize: "30px", fontWeight: "700" }}>COLLECTIBLES</h6>
-              <p style={styles.textParagraph}>Rabbit plush toy, cute and lovely</p>
+              <img
+                src="/src/assets/icons/Bookmark 2.png"
+                alt="Bookmark"
+                style={{ width: "37px", height: "37px" }}
+              />
+              <h6 style={{ fontSize: "30px", fontWeight: "700" }}>
+                COLLECTIBLES
+              </h6>
+              <p style={styles.textParagraph}>
+                Rabbit plush toy, cute and lovely
+              </p>
             </div>
           </div>
         </aside>
@@ -180,14 +199,26 @@ function Information() {
 
       {/* ส่วนของผู้ที่แลกเปลี่ยน */}
       <article style={{ width: "100%", padding: "40px" }}>
-        <h1 style={{ paddingLeft: "210px", fontSize: "35px", fontWeight: "700" }}>Trade by</h1>
+        <h1
+          style={{ paddingLeft: "210px", fontSize: "35px", fontWeight: "700" }}
+        >
+          Trade by
+        </h1>
         <div style={styles.tradeBy}>
           <a href="https://www.example.com">
-            <img src="https://www.example.com/image.jpg" alt="profile" style={{ width: "50px", height: "50px", borderRadius: "50%" }} />
+            <img
+              src="https://www.example.com/image.jpg"
+              alt="profile"
+              style={{ width: "50px", height: "50px", borderRadius: "50%" }}
+            />
           </a>
           <span style={styles.name}>killua zoldyck</span>
           <a href="https://www.example.com">
-            <img src="/src/assets/icons/Message Text.png" alt="Message" style={styles.message} />
+            <img
+              src="/src/assets/icons/Message Text.png"
+              alt="Message"
+              style={styles.message}
+            />
           </a>
         </div>
       </article>
@@ -197,8 +228,3 @@ function Information() {
 }
 
 export default Information;
-
-
-
-
-
