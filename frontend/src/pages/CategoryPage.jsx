@@ -47,7 +47,7 @@ const categoryData = {
   kids: {
     image: "/images/categorys/kids.png",
     description:
-      "kids products include a wide range of essential items designed for the care, comfort, and development of infants and young children. These products focus on safety, durability, and functionality to support parenting and child growth.",
+      "Kids products include a wide range of essential items designed for the care, comfort, and development of infants and young children. These products focus on safety, durability, and functionality to support parenting and child growth.",
   },
   beauty: {
     image: "/images/categorys/beauty.png",
@@ -78,15 +78,15 @@ function CategoryPage() {
             <img
               src={categoryInfo.image}
               alt={category}
-              className="w-full max-w-md h-auto rounded-lg shadow-lg object-cover"
+              className="w-full max-w-2xl h-auto rounded-lg shadow-lg object-cover"
             />
           </div>
 
           <div className="w-full md:w-1/2 text-center md:text-left">
-            <h1 className="text-4xl font-bold mb-4">
+            <h1 className="text-6xl font-semibold font-nunito text-center pt-[145px]">
               {category.toUpperCase()}
             </h1>
-            <p className="text-lg text-gray-700 leading-relaxed">
+            <p className="text-3xl text-gray-700 leading-relaxed font-inter mt-[35px]">
               {categoryInfo.description}
             </p>
           </div>
