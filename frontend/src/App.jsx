@@ -7,6 +7,8 @@ import CategoryPage from "./pages/CategoryPage";
 import UploadPage from "./pages/UploadPage";
 import Information from "./pages/Information";
 
+import Profile from "./pages/Profile";
+
 function App() {
   return (
     <Router>
@@ -14,6 +16,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/sign" element={<Sign />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/category/:category" element={<CategoryPage />} />
         <Route path="/uploadpage" element={<UploadPage />} />
         <Route path="/information" element={<Information />} />
