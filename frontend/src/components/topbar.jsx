@@ -1,21 +1,31 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Topbar() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    setUser(storedUser);
+  }, []);
+
   return (
     <div
       style={{
         backgroundColor: "white",
         width: "100%",
-        height: "80px", 
+        height: "80px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "0 40px", 
+        padding: "0 40px",
         overflow: "hidden",
         flexWrap: "nowrap",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>  {/* Search Section */}
+      {/* 🔹 Search Section */}
+      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
         <img
           src="/src/assets/icons/Search Normal.png"
           alt="find_icon"
@@ -34,19 +44,30 @@ function Topbar() {
         />
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "50px" }}>  {/* Profile Section */}
+      {/* 🔹 Profile Section */}
+      <div style={{ display: "flex", alignItems: "center", gap: "50px" }}>
         <img
           src="/src/assets/icons/Heart.png"
           alt="favorite_icon"
           style={{ width: "23px", height: "23px" }}
         />
-        <a href="https://www.example.com">
+
+        {user ? (
           <img
-            src="https://www.example.com/image.jpg"
+            src={user.profileImage || "/default-profile.png"}
             alt="profile"
-            style={{ width: "40px", height: "40px", borderRadius: "50%" }}
+            style={{ width: "40px", height: "40px", borderRadius: "50%", cursor: "pointer" }}
+            onClick={() => navigate("/profile")}
           />
-        </a>
+        ) : (
+          <a href="https://www.example.com">
+            <img
+              src="https://www.example.com/image.jpg"
+              alt="profile"
+              style={{ width: "40px", height: "40px", borderRadius: "50%" }}
+            />
+          </a>
+        )}
       </div>
     </div>
   );

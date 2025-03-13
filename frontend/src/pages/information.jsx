@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Topbar from "../components/Topbar";
+import Navbar from "../components/Navbar";
 import Background2 from "../components/Background2";
 import Footer from "../components/Footer";
 
@@ -129,7 +129,7 @@ function Information() {
 
   return (
     <div>
-      <Topbar />
+      <Navbar />
       <Background2 />
       <div style={styles.container}>
         {/* Section รูปภาพ */}

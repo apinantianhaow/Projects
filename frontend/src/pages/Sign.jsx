@@ -21,7 +21,8 @@ function Sign() {
       const data = await response.json();
       
       if (data === "Success") {
-        navigate("/");
+        localStorage.setItem("user", JSON.stringify({ email })); //save Login status
+        window.location.href = "/"; //refresh for change Navbar to Topbar
       } else {
         alert(data);
       }

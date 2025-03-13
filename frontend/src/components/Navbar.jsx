@@ -1,30 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Topbar from "./Topbar";
 
 function Navbar() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Check if the user is logged in when the component mounts
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setIsLoggedIn(true);
-    }
+    const user = JSON.parse(localStorage.getItem("user"));
+    setIsLoggedIn(!!user);
   }, []);
 
+  if (isLoggedIn) {
+    return <Topbar />; // ถ้า Login แล้ว ให้เปลี่ยนเป็น Topbar ทันที
+  }
+
   return (
-    <div
-      className="bg-white w-full h-20 flex justify-between items-center px-4 
-                    overflow-hidden flex-nowrap"
-    >
+    <div className="bg-white w-full h-20 flex justify-between items-center px-4 overflow-hidden flex-nowrap">
       <div className="flex items-center min-w-0">
-        <div className="flex-shrink-0">
-          <img
-            src="/src/assets/icons/Search Normal.png"
-            className="w-[22px] h-[22px] mt-[4px] ml-[40px]"
-          />
-        </div>
+        <img
+          src="/src/assets/icons/Search Normal.png"
+          className="w-[22px] h-[22px] mt-[4px] ml-[40px]"
+        />
 
         <input
           type="text"
@@ -33,36 +30,16 @@ function Navbar() {
                      focus:outline-none flex-shrink min-w-0"
         />
 
-        <div className="flex-shrink-0">
-          <img
-            src="/src/assets/icons/Heart.png"
-            className="w-[23px] h-[23px] mt-[4px] ml-[915px]"
-          />
-        </div>
+        <img
+          src="/src/assets/icons/Heart.png"
+          className="w-[23px] h-[23px] mt-[4px] ml-[915px]"
+        />
       </div>
 
       <div className="flex gap-3 flex-shrink-0">
         {isLoggedIn ? (
-          // ✅ Show user icon when logged in
-          <div className="flex items-center">
-            <img
-              src="/src/assets/icons/user.png" // User icon
-              className="w-[30px] h-[30px] cursor-pointer"
-              onClick={() => navigate("/profile")} // Navigate to profile page
-            />
-            <button
-              onClick={() => {
-                localStorage.removeItem("user"); // Remove user data
-                setIsLoggedIn(false); // Change status to logged out
-                navigate("/sign"); // Navigate back to Sign In page
-              }}
-              className="ml-3 bg-red-500 text-white px-4 py-1 rounded-lg"
-            >
-              Logout
-            </button>
-          </div>
+          <Topbar /> //Show Topbar after login
         ) : (
-          // ✅ Show Sign In and Register buttons if not logged in
           <>
             <button
               onClick={() => navigate("/sign")}
@@ -99,3 +76,4 @@ function Navbar() {
 }
 
 export default Navbar;
+
