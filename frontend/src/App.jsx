@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Sign from "./pages/Sign";
 import CategoryPage from "./pages/CategoryPage";
 import UploadPage from "./pages/UploadPage";
+import Information from "./pages/Information";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/sign" element={<Sign />} />
         <Route path="/category/:category" element={<CategoryPage />} />
         <Route path="/uploadpage" element={<UploadPage />} />
+        <Route path="/information" element={<Information />} />
       </Routes>
     </Router>
   );
