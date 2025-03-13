@@ -16,7 +16,7 @@ function UploadPage() {
   const [title, setTitle] = useState(""); // ให้ title เป็น textarea ขยายได้
   const [showModal, setShowModal] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
-  const handlePost = () => {window.location.href = "/sign";}; // ไปที่หน้า /sign ทันที(เปลี่ยนได้)
+  const handlePost = () => {window.location.href = "/sign";}; // ไปที่หน้า /sign ทันที(เปลี่ยนหน้าได้)
 
   return (
     <div>
