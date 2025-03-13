@@ -5,6 +5,8 @@ import Register from "./pages/Register";
 import Sign from "./pages/Sign";
 import CategoryPage from "./pages/CategoryPage";
 import Information from "./pages/Information";
+import UploadPage from "./pages/UploadPage";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
