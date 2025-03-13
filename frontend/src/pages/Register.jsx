@@ -11,7 +11,7 @@ function Register() {
   const navigate = useNavigate();
 
   const handleRegister = async () => {
-    if (!email.includes("@")) {
+    if (!email.includes("@") || !password) {
       setMessage("Error please try again");
       return;
     }
