@@ -4,7 +4,8 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Sign from "./pages/Sign";
 import CategoryPage from "./pages/CategoryPage";
-import Information from "./pages/information";
+import Information from "./pages/Information";
+
 function App() {
   return (
     <Router>
@@ -12,7 +13,9 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/sign" element={<Sign />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/category/:category" element={<CategoryPage />} />
+        <Route path="/uploadpage" element={<UploadPage />} />
         <Route path="/information" element={<Information />} />
       </Routes>
     </Router>
