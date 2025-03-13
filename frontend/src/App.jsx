@@ -4,8 +4,7 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Sign from "./pages/Sign";
 import CategoryPage from "./pages/CategoryPage";
-import Information from "./pages/Information";
-
+import Information from "./pages/information";
 function App() {
   return (
     <Router>
