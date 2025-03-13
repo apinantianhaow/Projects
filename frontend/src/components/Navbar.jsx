@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Topbar from "./Topbar";
+import Topbar from "./topbar";
 
 function Navbar() {
   const navigate = useNavigate();
