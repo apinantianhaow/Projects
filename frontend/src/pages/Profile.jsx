@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar2 from "../components/Navbar2";
+import Topbar from "../components/Topbar";
 import Background2 from "../components/Background2";
 import Image from "../../public/images/profile/pf1.png";
 import Footer from "../components/Footer";
@@ -11,7 +11,7 @@ import Postprofile from "../components/Postprofile";
 function Profile() {
     return (
         <div>
-            <Navbar2 />
+            <Topbar />
             <Background2 />
             <div className="w-full min-h-screen h-fit bg-cover bg-center flex flex-col ">
                 <div className="flex flex-row w-full h-[500px] items-center border-b-1 border-[#767676]">
