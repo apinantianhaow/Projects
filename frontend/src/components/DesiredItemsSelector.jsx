@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-
 function DesiredItemsSelector({ selectedDesiredItem, setSelectedDesiredItem, closeModal }) {
   const [tempDesiredItem, setTempDesiredItem] = useState(selectedDesiredItem);
   const categories = ["Electronics", "Clothing", "Books", "Home", "Plants", "Art&Handmade", "Collectibles", "Sports", "Kids", "Beauty", "Grocery"];
@@ -8,7 +7,7 @@ function DesiredItemsSelector({ selectedDesiredItem, setSelectedDesiredItem, clo
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white p-4 rounded-md w-96">
-        <h3 className="font-bold text-lg mb-2">Select Desired Item</h3>
+        <h3 className="font-bold text-lg mb-2">Desired Items category</h3>
 
         {/* ตัวเลือกสินค้าที่ต้องการ */}
         {categories.map((item, index) => (

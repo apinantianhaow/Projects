@@ -12,8 +12,7 @@ function ConditionSelector({ selectedCondition, setSelectedCondition, closeModal
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white p-6 rounded-lg w-80 shadow-lg">
         <h3 className="font-bold text-lg mb-4">Condition</h3>
-
-        {/* ตัวเลือกเงื่อนไข + สีตัวหนังสือ + ปุ่มเลือก */}
+        
         {conditions.map((condition, index) => (
           <label 
             key={index} 
