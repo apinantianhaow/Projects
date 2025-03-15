@@ -1,7 +1,7 @@
 import React from "react";
 import Topbar from "../components/Topbar";
 import Background2 from "../components/Background2";
-import Image from "../../src/assets/images/Dog1.png";
+import Image from "../assets/images/Dog1.png";
 import Footer from "../components/Footer";
 import Laurel from "../assets/images/Laurel2.jpg";
 import { IoBookOutline } from "react-icons/io5";

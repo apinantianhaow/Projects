@@ -16,7 +16,7 @@ function Register() {
       return;
     }
     try {
-      const response = await fetch("http://localhost:5001/register", {
+      const response = await fetch("http://localhost:5000/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,24 +42,59 @@ function Register() {
         style={{ backgroundImage: `url(${bgImage})` }}
       >
         <div className="bg-white p-8 rounded-lg shadow-lg w-132 h-133">
-          <input
-            type="email"
-            className="w-full px-4 py-2 border rounded-lg"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            className="w-full px-4 py-2 border rounded-lg mt-4"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button className="w-full bg-black text-white py-2 rounded-lg mt-4" onClick={handleRegister}>
+          <div className="mb-4">
+            <label className="block text-[#1E1E1E] text-sm font-bold mb-2">
+              Email
+            </label>
+            <input
+              type="email"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-[#1E1E1E] text-sm font-bold mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <div className="flex items-center mb-4">
+            <input type="checkbox" id="agree" className="mr-2" />
+            <label htmlFor="agree" className="font-bold text-sm text-[#1E1E1E]">
+              Remember me
+            </label>
+          </div>
+
+          <button
+            style={{
+              backgroundColor: "#2C2C2C",
+            }}
+            className="w-full text-white py-2 rounded-lg hover:bg-[#2C2C2C] transition duration-300"
+            onClick={handleRegister}
+          >
             Register
           </button>
-          {message && <p className="mt-4 text-center">{message}</p>}
+          {message && (
+            <p
+              className={`mt-4 text-center ${
+                message === "Error please try again"
+                  ? "text-red-600"
+                  : "text-green-600"
+              }`}
+            >
+              {message}
+            </p>
+          )}
         </div>
       </div>
     </div>
