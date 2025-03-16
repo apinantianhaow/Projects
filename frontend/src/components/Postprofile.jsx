@@ -31,14 +31,7 @@ function Postprofile() {
             </div>
 
             <div className="flex flex-col flex-grow  mt-3 px-2">
-              <h6 className="text-[18px] font-bold">{product.title}</h6>
-
-              {product.likes > 0 && (
-                <div className="flex items-center gap-2 mt-2">
-                  <GoHeart className="w-[25px] h-[25px] text-gray-600" />
-                  <p className="text-gray-600 text-xs">{product.likes}</p>
-                </div>
-              )}
+              <h6 className="text-[18px] font-bold">{product.title}</h6>           
             </div>
 
           </div>

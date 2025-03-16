@@ -8,6 +8,8 @@ import Information from "./pages/Information";
 import UploadPage from "./pages/UploadPage";
 import Profile from "./pages/Profile";
 import Profile2 from "./pages/Profile2";
+import RegisterUsername from "./pages/RegisterUsername";
+import RegisterPhoto from "./pages/RegisterPhoto.jsx";
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
         <Route path="/category/:category" element={<CategoryPage />} />
         <Route path="/uploadpage" element={<UploadPage />} />
         <Route path="/information" element={<Information />} />
+        <Route path="/registerUsername" element={<RegisterUsername />} />
+        <Route path="/registerPhoto" element={<RegisterPhoto />} /> 
       </Routes>
     </Router>
   );
