@@ -26,7 +26,7 @@ function Register() {
       const data = await response.json();
       setMessage(data.message);
       if (data.message === "User registered successfully!") {
-        setTimeout(() => navigate("/sign"), 1000);
+        setTimeout(() => navigate("/registerUsername"), 1000);
       }
     } catch (error) {
       setMessage("An error occurred. Please try again.");

@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
+const multer =  require("multer");
+const sharp = require("sharp");
 
 const app = express();
 app.use(express.json());
@@ -24,7 +26,17 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true },
 });
 
+const profileSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  username: { type: String, required: true },
+  image: {
+    data: Buffer,
+    contentType: String,
+  },
+});
+
 const User = mongoose.model("User", UserSchema);
+const Profile = mongoose.model('Profile', profileSchema);
 
 // API For Register
 app.post("/register", async (req, res) => {
@@ -54,6 +66,41 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+const upload = multer({ storage: multer.memoryStorage() });
+app.post('/profile', upload.single('image'), async (req, res) => {
+  try {
+    const { name, username } = req.body;
+    let imageBuffer = null;
+    let imageContentType = null;
+
+    if (req.file) {
+      imageBuffer = await sharp(req.file.buffer)
+        .resize({ width: 1024 })  
+        .jpeg({ quality: 80 })    
+        .toBuffer();
+
+        imageData = {
+          data: imageBuffer,
+          contentType: req.file.mimetype,
+        };
+    }
+
+    const newProfile = await Profile.create({
+      name,
+      username,
+      image: imageData,
+    });
+
+    console.log("Save success"); 
+    res.status(200).json({ message: 'Profile created successfully.' });
+  } catch (error) {
+    console.error('Error processing profile:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 
 //Start Server
 const PORT = 5000;
