@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Kaisei+HarunoUmi:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Judson:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap');
 @import "tailwindcss";
 
 html, body {
@@ -29,4 +30,8 @@ html, body {
 
 .font-judson {
   font-family: 'Judson', serif;
+}
+
+.font-newsreader {
+  font-family: 'Newsreader', serif;
 }

@@ -18,7 +18,7 @@ function UploadPage() {
   const [showModal, setShowModal] = useState(null);
 
   const handlePost = () => {
-    window.location.href = "/sign";//เปลี่ยนเป็นหน้าอื่นได้
+    window.location.href = "/profile";//เปลี่ยนเป็นหน้าอื่นได้
   };
 
   return (
