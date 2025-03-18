@@ -4,13 +4,18 @@ import Navbar2 from "../components/Navbar2";
 import Background2 from "../components/Background2";
 import bgImage from "../assets/images/image1.png";
 
-
 function RegisterUsername() {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const navigate = useNavigate();
 
-  
+  const handleNext = () => {
+    if (!name.trim() || !username.trim()) {
+      alert("Please enter your name and username.");
+      return;
+    }
+    navigate("/registerPhoto", { state: { name, username } });
+  };
 
   return (
     <div>
@@ -21,16 +26,11 @@ function RegisterUsername() {
         style={{ backgroundImage: `url(${bgImage})` }}
       >
         <div className="bg-white p-8 rounded-lg shadow-lg w-132 h-133">
-            <div className="flex flex-col">
-                <h className="font-bold text-[40px]">
-                    Setup your account
-                </h>
-                <h className="text-[25px] mb-5 ">
-                    introduce yourself
-                </h>
-            </div>
-          <div >
-            <label className="block text-[#1E1E1E] text-sm font-bold mb-2">
+          <div className="flex flex-col">
+            <h1 className="font-newsreader text-[50px]">Setup your account</h1>
+          </div>
+          <div>
+            <label className="block text-[#1E1E1E] text-[15px] font-semibold mb-2 mt-2">
               Your name
             </label>
             <input
@@ -43,8 +43,8 @@ function RegisterUsername() {
           </div>
 
           <div className="mb-10 mt-6">
-            <label className="block text-[#1E1E1E] text-sm font-bold mb-2">
-              Creat username
+            <label className="block text-[#1E1E1E] text-[15px] font-semibold mb-2">
+              Create username
             </label>
             <input
               type="text"
@@ -56,15 +56,12 @@ function RegisterUsername() {
           </div>
 
           <button
-            style={{
-              backgroundColor: "#2C2C2C",
-            }}
+            style={{ backgroundColor: "#2C2C2C" }}
             className="w-full text-white py-2 rounded-lg hover:bg-[#2C2C2C] transition duration-300"
-            onClick={() => navigate("/registerPhoto", {state: {name: name, username: username}})}
+            onClick={handleNext}
           >
             Next
           </button>
-          
         </div>
       </div>
     </div>

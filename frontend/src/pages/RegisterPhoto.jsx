@@ -24,46 +24,45 @@ function RegisterPhoto() {
     const file = event.target.files[0];
     if (file) {
       const options = {
-        maxSizeMB: 1, 
-        maxWidthOrHeight: 1024, 
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1024,
         useWebWorker: true,
       };
 
       try {
         const compressedFile = await imageCompression(file, options);
-        console.log("ขนาดไฟล์ก่อนบีบอัด:", file.size);
-        console.log("ขนาดไฟล์หลังบีบอัด:", compressedFile.size);
+        console.log("File size before compression : ", file.size);
+        console.log("File size after compression : ", compressedFile.size);
         setImage(compressedFile);
       } catch (error) {
-        console.error("เกิดข้อผิดพลาดในการบีบอัดไฟล์:", error);
+        console.error("Error occurred during file compression : ", error);
       }
     }
   };
 
   const handleSave = async () => {
     try {
-    
       const formData = new FormData();
       formData.append("name", name);
       formData.append("username", username);
-  
+
       if (image) {
         formData.append("image", image);
       }
-  
+
       const response = await fetch("http://localhost:5000/profile", {
         method: "POST",
         body: formData,
-      }); 
+      });
 
       const data = await response.json();
-      if (data.message ){
+      if (data.message) {
         alert(data.message);
-        navigate("/sign")
+        navigate("/sign");
       } else {
         alert(data.error);
       }
-  
+
       console.log("Profile saved:", data);
     } catch (error) {
       console.error("Error saving profile:", error);
@@ -80,14 +79,13 @@ function RegisterPhoto() {
       >
         <div className="bg-white p-8 rounded-lg shadow-lg w-132 h-133">
           <div>
-            <h className="font-bold text-[40px]">Setup your account</h>
+            <h1 className="font-newsreader text-[40px]">Setup your account photo</h1>
             <br />
-            <h className="text-[25px] ">Add your photo</h>
           </div>
 
           <div
             onClick={handleopenfile}
-            className="w-[460px]  h-[220px] bg-[#F2F2F2] rounded-2xl justify-center items-center flex flex-col mt-5 mb-10"
+            className="w-[460px]  h-[220px] bg-[#d4d4d4] rounded-2xl justify-center items-center flex flex-col mb-10"
           >
             <TbPhotoPlus className=" w-[100px]  h-[100px] text-black " />
             {image ? (
