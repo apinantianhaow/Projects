@@ -1,5 +1,5 @@
 import React from "react";
-import Topbar from "../components/Topbar";
+import Topbar from "../components/topbar";
 import Background2 from "../components/Background2";
 import Image from "../assets/images/Dog1.png";
 import Footer from "../components/Footer";
@@ -8,7 +8,7 @@ import { IoBookOutline } from "react-icons/io5";
 import Postprofile from "../components/Postprofile";
 import Icontext from "../assets/icons/Message.png";
 
-function Profile() {
+function Profile2() {
     return (
         <div>
             <Topbar />
@@ -72,4 +72,4 @@ function Profile() {
     );
 }
 
-export default Profile;
+export default Profile2;
