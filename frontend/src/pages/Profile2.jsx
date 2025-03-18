@@ -1,5 +1,5 @@
 import React from "react";
-import Topbar from "../components/Topbar";
+import Topbar from "../components/topbar";
 import Background2 from "../components/Background2";
 import Image from "../../src/assets/profiles/snoopdog.png";
 import Footer from "../components/Footer";
@@ -9,7 +9,8 @@ import Postprofile from "../components/Postprofile";
 import Icontext from "../assets/icons/Message.png";
 import { useNavigate } from "react-router-dom";
 
-function Profile() {
+
+function Profile2() {
   const navigate = useNavigate();
     return (
         <div>
@@ -83,4 +84,4 @@ function Profile() {
     );
 }
 
-export default Profile;
+export default Profile2;

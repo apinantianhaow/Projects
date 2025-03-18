@@ -1,5 +1,5 @@
 import React from "react";
-import Topbar from "../components/Topbar";
+import Topbar from "../components/topbar";
 import Background2 from "../components/Background2";
 import Image from "../../src/assets/profiles/image14.png";
 import Footer from "../components/Footer";
