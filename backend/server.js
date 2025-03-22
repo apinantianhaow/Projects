@@ -88,7 +88,29 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// API For Profile
+// API GET ดึงเฉพาะ username, name, image
+app.get("/profile", async (req, res) => {
+  try {
+    const profile = await Profile.findOne({}, "username name image"); // ดึงเฉพาะฟิลด์ที่ต้องการ
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    // แปลงรูปภาพเป็น Base64
+    let profileData = {
+      username: profile.username,
+      name: profile.name,
+      imageUrl: profile.image
+        ? `data:${profile.image.contentType};base64,${profile.image.data.toString("base64")}`
+        : null,
+    };
+
+    res.json(profileData);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 const upload = multer({ storage: multer.memoryStorage() });
 app.post('/profile', upload.single('image'), async (req, res) => {
   try {

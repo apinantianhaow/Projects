@@ -5,8 +5,8 @@ import "swiper/css";
 
 function Category() {
   return (
-    <section className="text-center mt-[190px]">
-      <h2 className="text-[55px] font-kaisei mb-6">CATEGORY</h2>
+    <section className="text-center mt-[200px]">
+      <h2 className="text-[60px] font-kaisei mb-6">CATEGORY</h2>
       <div className="bg-[#767676] pb-12 pt-6 flex justify-center mt-[40px] min-h-[450px] h-auto">
         <Swiper
           slidesPerView={"auto"}

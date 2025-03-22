@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Topbar from "../components/topbar";
 import Background2 from "../components/Background2";
 import Image from "../../src/assets/profiles/image14.png";
@@ -11,19 +11,35 @@ import { useNavigate } from "react-router-dom";
 
 function Profile() {
   const navigate = useNavigate();
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/profile"); // เรียก API
+        const data = await response.json();
+        setProfile(data);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
     return (
         <div>
             <Topbar />
             <Background2 />
             <div className="w-full min-h-screen h-fit bg-cover bg-center flex flex-col ">
                 <div className="flex flex-row w-full h-[500px] items-center border-b-1 border-[#767676]">
-                     <img src={Image} alt="pf1" className="w-[335px] h-[335px]  ml-[120px]" /> 
+                     <img src={profile?.imageUrl || Image} alt="pf1" className="w-[335px] h-[335px]  ml-[120px] rounded-full" /> 
                      <div className=" ml-[60px]">
                         <h1 className="text-[40px] font-bold ">
-                          Lnw ZAzakub
+                          {profile?.name}
                         </h1>
                         <h1 className="text-[34px] text-[#767676]">
-                          @Lnw ZAzakub
+                          @{profile?.username}
                         </h1>
                      </div>
                      
