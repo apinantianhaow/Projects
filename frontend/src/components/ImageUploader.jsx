@@ -1,7 +1,7 @@
 import { useState } from "react";
 import UploadIcon from "../assets/icons/Image.png"; 
 
-function ImageUploader() {
+function ImageUploader({ setImages }) {
   const [selectedImage, setSelectedImage] = useState(null);
 
   const handleImageUpload = (event) => {
@@ -9,8 +9,12 @@ function ImageUploader() {
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setSelectedImage(imageUrl);
+  
+      // ✅ ส่งไฟล์จริงกลับไปให้ UploadPage
+      setImages([file]);
     }
   };
+  
 
   return (
     <div className="flex flex-col items-center">
