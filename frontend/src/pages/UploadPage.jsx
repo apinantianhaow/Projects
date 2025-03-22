@@ -9,6 +9,7 @@ import DesiredItemsSelector from "../components/DesiredItemsSelector";
 import IconImage from "../assets/icons/icon.png";
 
 function UploadPage() {
+  const [images, setImages] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCondition, setSelectedCondition] = useState("");
   const [conditionNote, setConditionNote] = useState("");
@@ -17,10 +18,42 @@ function UploadPage() {
   const [title, setTitle] = useState("");
   const [showModal, setShowModal] = useState(null);
 
-  const handlePost = () => {
-    window.location.href = "/profile";//เปลี่ยนเป็นหน้าอื่นได้
+  const handlePost = async () => {
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", conditionNote); // ใช้ description จาก conditionNote
+    formData.append("category", selectedCategory);
+    formData.append("condition", selectedCondition);
+    formData.append("desiredItems", selectedDesiredItem);
+    formData.append("desiredNote", desiredNote);
+  
+    // 👇 แนบรูปภาพ (จาก ImageUploader)
+    if (images && images.length > 0) {
+      for (let i = 0; i < images.length; i++) {
+        formData.append("images", images[i]);
+      }
+    }
+  
+    try {
+      const res = await fetch("http://localhost:5000/upload-item", {
+        method: "POST",
+        body: formData,
+      });
+  
+      const result = await res.json();
+      console.log(result);
+  
+      if (res.ok) {
+        window.location.href = "/profile";
+      } else {
+        alert("❌ Upload ผิดพลาด");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("❌ เกิดข้อผิดพลาด");
+    }
   };
-
+  
   return (
     <div>
       <Navbar2 />
@@ -30,7 +63,7 @@ function UploadPage() {
           
           {/* อัพโหลดภาพ */}
           <div className="flex justify-center w-full md:w-auto">
-            <ImageUploader />
+            <ImageUploader setImages={setImages} />
           </div>
 
           {/* กรอกข้อมูล */}

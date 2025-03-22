@@ -35,8 +35,29 @@ const profileSchema = new mongoose.Schema({
   },
 });
 
+const itemSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  description: String,
+  category: String,
+  condition: String,
+  desiredItems: String,
+  desiredNote: String,
+  images: [
+    {
+      data: Buffer,
+      contentType: String,
+    }
+  ],
+  uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  }
+});
+
 const User = mongoose.model("User", UserSchema);
 const Profile = mongoose.model('Profile', profileSchema);
+const Item = mongoose.model("item", itemSchema);
 
 // API For Register
 app.post("/register", async (req, res) => {
@@ -123,6 +144,42 @@ app.post('/profile', upload.single('image'), async (req, res) => {
   }
 });
 
+// API For Upload
+app.post("/upload-item", upload.array("images"), async (req, res) => {
+  try {
+    const files = req.files;
+    const resizedImages = [];
+
+    for (const file of files) {
+      const resized = await sharp(file.buffer)
+        .resize({ width: 552 })      
+        .jpeg({ quality: 80 })       
+        .toBuffer();
+
+      resizedImages.push({
+        data: resized,
+        contentType: file.mimetype,
+      });
+    }
+
+    const newItem = await Item.create({
+      title: req.body.title,
+      description: req.body.description,
+      category: req.body.category,
+      condition: req.body.condition,
+      desiredItems: req.body.desiredItems,
+      desiredNote: req.body.desiredNote,
+      images: resizedImages,
+      uploadedBy: req.body.uploadedBy || null,
+    });
+
+    console.log("✅ Item saved");
+    res.status(200).json({ message: "Item uploaded successfully", item: newItem });
+  } catch (error) {
+    console.error("❌ Upload error:", error);
+    res.status(500).json({ error: "Upload failed" });
+  }
+});
 
 
 //Start Server
