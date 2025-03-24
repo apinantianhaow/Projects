@@ -81,8 +81,8 @@ function Topbar({ setIsLoggedIn }) {
               src={profile.imageUrl}
               alt="profile"
               style={{
-                width: "45px",
-                height: "45px",
+                width: "55px",
+                height: "55px",
                 borderRadius: "50%",
                 cursor: "pointer",
               }}
@@ -109,7 +109,7 @@ function Topbar({ setIsLoggedIn }) {
         </div>
       </div>
 
-      
+
     </>
   );
 }

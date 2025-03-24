@@ -164,6 +164,41 @@ app.post("/upload-item", upload.array("images"), async (req, res) => {
     res.status(500).json({ error: "Upload failed" });
   }
 });
+app.get("/items/:category/:title", async (req, res) => {
+  try {
+    const item = await Item.findOne({
+      category: req.params.category,
+      title: req.params.title,
+    });
+
+    if (!item) return res.status(404).json({ message: "Item not found" });
+
+    // 🔍 หา profile ของผู้โพสต์
+    const profile = await Profile.findOne({ userId: item.uploadedBy });
+
+    // 🔄 แปลงภาพ
+    const imageList = item.images.map((img) =>
+      `data:${img.contentType};base64,${img.data.toString("base64")}`
+    );
+
+    // ✅ รวมข้อมูลทั้งหมดที่ต้องส่งกลับ
+    const result = {
+      ...item._doc,
+      images: imageList,
+      uploadedBy: {
+        username: profile?.username || "Unknown",
+        imageUrl: profile?.image
+          ? `data:${profile.image.contentType};base64,${profile.image.data.toString("base64")}`
+          : null,
+      },
+    };
+
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("❌ Error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // ====== START SERVER ======
 const PORT = 5001;
