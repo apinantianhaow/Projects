@@ -2,12 +2,14 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
-const multer =  require("multer");
+const multer = require("multer");
 const sharp = require("sharp");
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173"
+}));
 
 mongoose
   .connect(
@@ -20,7 +22,6 @@ mongoose
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
-//Create Schema and Model
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -42,17 +43,12 @@ const itemSchema = new mongoose.Schema({
   condition: String,
   desiredItems: String,
   desiredNote: String,
-  images: [
-    {
-      data: Buffer,
-      contentType: String,
-    }
-  ],
+  images: [{
+    data: Buffer,
+    contentType: String,
+  }],
   uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  }
+  createdAt: { type: Date, default: Date.now },
 });
 
 const User = mongoose.model("User", UserSchema);
@@ -65,7 +61,7 @@ app.post("/register", async (req, res) => {
     const { email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({ email, password: hashedPassword });
-    res.json({ message: "User registered successfully!", user: newUser });
+    res.status(200).json({ message: "User registered successfully!", userId: newUser._id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -77,111 +73,69 @@ app.post("/login", async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
-    if (!user) return res.json("No record existed");
+    if (!user) return res.status(400).json({ message: "No record existed" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.json("The password is incorrect");
+    if (!isMatch) return res.status(400).json({ message: "The password is incorrect" });
 
-    res.json("Success");
+    res.status(200).json({ message: "Success", userId: user._id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// API GET ดึงเฉพาะ username, name, image
 app.get("/profile", async (req, res) => {
   try {
-    const profile = await Profile.findOne({}, "username name image"); // ดึงเฉพาะฟิลด์ที่ต้องการ
-    if (!profile) {
-      return res.status(404).json({ message: "Profile not found" });
-    }
+    const profile = await Profile.findOne({}, "username name image");
+    if (!profile) return res.status(404).json({ message: "Profile not found" });
 
-    // แปลงรูปภาพเป็น Base64
-    let profileData = {
+    res.status(200).json({
       username: profile.username,
       name: profile.name,
-      imageUrl: profile.image
-        ? `data:${profile.image.contentType};base64,${profile.image.data.toString("base64")}`
-        : null,
-    };
-
-    res.json(profileData);
+      imageUrl: profile.image ? `data:${profile.image.contentType};base64,${profile.image.data.toString("base64")}` : null,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 const upload = multer({ storage: multer.memoryStorage() });
+
 app.post('/profile', upload.single('image'), async (req, res) => {
   try {
     const { name, username } = req.body;
-    let imageBuffer = null;
-    let imageContentType = null;
+    let imageData = null;
 
     if (req.file) {
-      imageBuffer = await sharp(req.file.buffer)
-        .resize({ width: 1024 })  
-        .jpeg({ quality: 80 })    
-        .toBuffer();
-
-        imageData = {
-          data: imageBuffer,
-          contentType: req.file.mimetype,
-        };
+      const imageBuffer = await sharp(req.file.buffer).resize({ width: 1024 }).jpeg({ quality: 80 }).toBuffer();
+      imageData = { data: imageBuffer, contentType: req.file.mimetype };
     }
 
-    const newProfile = await Profile.create({
-      name,
-      username,
-      image: imageData,
-    });
-
-    console.log("Save success"); 
+    const newProfile = await Profile.create({ name, username, image: imageData });
     res.status(200).json({ message: 'Profile created successfully.' });
   } catch (error) {
-    console.error('Error processing profile:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-// API For Upload
 app.post("/upload-item", upload.array("images"), async (req, res) => {
   try {
-    const files = req.files;
-    const resizedImages = [];
-
-    for (const file of files) {
-      const resized = await sharp(file.buffer)
-        .resize({ width: 552 })      
-        .jpeg({ quality: 80 })       
-        .toBuffer();
-
-      resizedImages.push({
-        data: resized,
-        contentType: file.mimetype,
-      });
-    }
+    const resizedImages = await Promise.all(req.files.map(async (file) => ({
+      data: await sharp(file.buffer).resize({ width: 552 }).jpeg({ quality: 80 }).toBuffer(),
+      contentType: file.mimetype,
+    })));
 
     const newItem = await Item.create({
-      title: req.body.title,
-      description: req.body.description,
-      category: req.body.category,
-      condition: req.body.condition,
-      desiredItems: req.body.desiredItems,
-      desiredNote: req.body.desiredNote,
+      ...req.body,
       images: resizedImages,
       uploadedBy: req.body.uploadedBy || null,
     });
 
-    console.log("✅ Item saved");
     res.status(200).json({ message: "Item uploaded successfully", item: newItem });
   } catch (error) {
-    console.error("❌ Upload error:", error);
     res.status(500).json({ error: "Upload failed" });
   }
 });
 
-
-//Start Server
 const PORT = 5001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

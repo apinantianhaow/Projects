@@ -50,7 +50,7 @@ function RegisterPhoto() {
         formData.append("image", image);
       }
 
-      const response = await fetch("http://localhost:5000/profile", {
+      const response = await fetch("http://localhost:5001/profile", {
         method: "POST",
         body: formData,
       });
