@@ -35,7 +35,6 @@ function Topbar({ setIsLoggedIn }) {
     <>
       <div
         style={{
-          position: "fixed",
           top: 0,
           left: 0,
           backgroundColor: "white",
@@ -110,7 +109,7 @@ function Topbar({ setIsLoggedIn }) {
         </div>
       </div>
 
-      <div style={{ height: "80px" }} />
+      
     </>
   );
 }
