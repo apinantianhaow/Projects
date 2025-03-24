@@ -4,7 +4,7 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Sign from "./pages/Sign";
 import CategoryPage from "./pages/CategoryPage";
-import Information from "./pages/Information";
+import Information from "./pages/Information.jsx";
 import UploadPage from "./pages/UploadPage";
 import Profile from "./pages/Profile";
 import Profile2 from "./pages/Profile2";
