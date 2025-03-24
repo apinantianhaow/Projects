@@ -29,11 +29,6 @@ function Navbar() {
           className="w-[100px] sm:w-[150px] md:w-100 px-6 py-1 border-none rounded-md ml-[10px] 
                      focus:outline-none flex-shrink min-w-0"
         />
-
-        <img
-          src="/src/assets/icons/Heart.png"
-          className="w-[23px] h-[23px] mt-[4px] ml-[930px]"
-        />
       </div>
 
       <div className="flex gap-3 flex-shrink-0">

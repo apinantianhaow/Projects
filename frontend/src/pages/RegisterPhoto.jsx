@@ -43,6 +43,7 @@ function RegisterPhoto() {
   const handleSave = async () => {
     try {
       const formData = new FormData();
+      formData.append("userId", localStorage.getItem("userId"));
       formData.append("name", name);
       formData.append("username", username);
 

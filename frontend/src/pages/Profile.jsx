@@ -16,7 +16,7 @@ function Profile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch("http://localhost:5000/profile"); // เรียก API
+        const response = await fetch("http://localhost:5001/profile"); // เรียก API
         const data = await response.json();
         setProfile(data);
       } catch (error) {
