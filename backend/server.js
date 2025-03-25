@@ -17,8 +17,8 @@ mongoose
       useUnifiedTopology: true,
     }
   )
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.error("MongoDB Connection Error:", err));
 
 //Create Schema and Model
 const UserSchema = new mongoose.Schema({
@@ -35,8 +35,21 @@ const profileSchema = new mongoose.Schema({
   },
 });
 
+const PostSchema = new mongoose.Schema({
+  title: String,
+  description: String,
+  category: String,
+  condition: String,
+  desiredItems: String,
+  desiredNote: String,
+  images: [String],
+  uploadedBy: mongoose.Schema.Types.ObjectId,
+  createdAt: { type: Date, default: Date.now },
+});
+
 const User = mongoose.model("User", UserSchema);
 const Profile = mongoose.model('Profile', profileSchema);
+const Post = mongoose.model("Post", PostSchema);
 
 // API For Register
 app.post("/register", async (req, res) => {
@@ -66,6 +79,56 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+//Check Email in Databases
+app.post("/check-email", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (user) {
+      res.json({ exists: true });
+    } else {
+      res.json({ exists: false });
+    }
+  } catch (err) {
+    console.error("/check-email error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+//API For Reset Password
+app.post("/reset-password", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ error: "Email not found in the system" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: "Your password has been reset successfully." });
+  } catch (err) {
+    console.error("Error in /reset-password: ", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.get("/api/posts", async (req, res) => {
+  try {
+    const posts = await Post.find().sort({ createdAt: -1 });
+    res.json(posts);
+  } catch (err) {
+    console.error("Error fetching posts:", err);
+    res.status(500).json({ error: "Failed to fetch posts" });
+  }
+});
+
+app.use("/uploads", express.static("uploads"));
 
 const upload = multer({ storage: multer.memoryStorage() });
 app.post('/profile', upload.single('image'), async (req, res) => {
@@ -99,8 +162,6 @@ app.post('/profile', upload.single('image'), async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
-
 
 //Start Server
 const PORT = 5000;

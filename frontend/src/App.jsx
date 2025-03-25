@@ -10,6 +10,8 @@ import Profile from "./pages/Profile";
 import Profile2 from "./pages/Profile2";
 import RegisterUsername from "./pages/RegisterUsername";
 import RegisterPhoto from "./pages/RegisterPhoto.jsx";
+import Forgetpassword from "./pages/Forgetpassword.jsx";
+import Resetpassword from "./pages/Resetpassword.jsx";
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
         <Route path="/information" element={<Information />} />
         <Route path="/registerUsername" element={<RegisterUsername />} />
         <Route path="/registerPhoto" element={<RegisterPhoto />} /> 
+        <Route path="/forget-password" element={<Forgetpassword/>} />
+        <Route path="/reset-password" element={<Resetpassword/>} />
       </Routes>
     </Router>
   );
