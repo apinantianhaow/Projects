@@ -2,6 +2,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Background2 from "../components/Background2";
+import Postprofile from "../components/Postprofile";
 
 const categoryData = {
   electronics: {
@@ -92,6 +93,7 @@ function CategoryPage() {
           </div>
         </div>
       </div>
+      <Postprofile />
     </>
   );
 }
