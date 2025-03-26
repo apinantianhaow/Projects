@@ -46,7 +46,10 @@ function RegisterPhoto() {
       formData.append("userId", localStorage.getItem("userId"));
       formData.append("name", name);
       formData.append("username", username);
-
+      formData.append("trades", Number(0));
+      formData.append("followers", Number(0));
+      formData.append("following", Number(0));
+      
       if (image) {
         formData.append("image", image);
       }

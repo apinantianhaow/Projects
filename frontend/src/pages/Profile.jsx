@@ -53,7 +53,7 @@ function Profile() {
               className="w-[70px] h-[70px] object-contain"
             />
             <div>
-              <h1 className="text-[30px] font-bold text-center ">15</h1>
+              <h1 className="text-[30px] font-bold text-center ">{profile?.trades}</h1>
               <h1 className="text-[24px] font-bold text-[#8D8D9E]">trades</h1>
             </div>
             <img
@@ -64,16 +64,16 @@ function Profile() {
           </div>
 
           <div className=" ml-[150px] ">
-            <h1 className="text-[30px] font-bold text-center">24</h1>
+            <h1 className="text-[30px] font-bold text-center">{profile?.followers}</h1>
             <h1 className="text-[24px] font-bold text-[#8D8D9E]">followers</h1>
           </div>
 
           <div className=" ml-[150px] ">
-            <h1 className="text-[30px] font-bold text-center">19</h1>
+            <h1 className="text-[30px] font-bold text-center">{profile?.following}</h1>
             <h1 className="text-[24px] font-bold text-[#8D8D9E]">following</h1>
           </div>
         </div>
-
+        {profile}
         <div className="justify-center ml-[90px]">
           <div
             onClick={() => navigate("/uploadpage")}
@@ -86,6 +86,7 @@ function Profile() {
         </div>
         <Postprofile />
       </div>
+
       <Footer />
     </div>
   );

@@ -11,7 +11,10 @@ import { useNavigate } from "react-router-dom";
 function Profile2() {
   const navigate = useNavigate();
   const [isFollowing, setIsFollowing] = useState(false);
-
+  const handleFollow = () =>{
+    
+      setIsFollowing(!isFollowing)
+  }
   return (
     <div>
       <Topbar />
@@ -66,7 +69,7 @@ function Profile2() {
       
             <div className="flex justify-center ml-[70px] gap-15 ">
             <button
-              onClick={() => setIsFollowing(!isFollowing)}
+              onClick={handleFollow}
               className={`w-[400px] h-[60px] text-[20px] rounded-xl cursor-pointer font-semibold ${
                 isFollowing
                   ? "bg-gray-400 text-white"
