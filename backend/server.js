@@ -28,6 +28,9 @@ const ProfileSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   name: { type: String, required: true },
   username: { type: String, required: true },
+  trades: { type: Number, required: true, default: 0 }, // เพิ่ม field trades
+  followers: { type: Number, required: true, default: 0 }, // เพิ่ม field followers
+  following: { type: Number, required: true, default: 0 }, // เพิ่ม field following
   image: {
     data: Buffer,
     contentType: String,
@@ -91,7 +94,11 @@ app.post("/login", async (req, res) => {
 // ====== CREATE PROFILE ======
 app.post("/profile", upload.single("image"), async (req, res) => {
   try {
-    const { userId, name, username } = req.body;
+    const { userId, name, username} = req.body;
+
+    // console.log("Full req.body:", req.body);
+    // console.log("Trades:", trades, "Followers:", followers, "Following:", following);
+
     let imageData = null;
 
     if (req.file) {
@@ -110,15 +117,19 @@ app.post("/profile", upload.single("image"), async (req, res) => {
       userId,
       name,
       username,
+      followers: 0,
+      following: 0,
+      trades: 0,
       image: imageData,
     });
 
-    res.status(200).json({ message: "Profile created successfully." });
-  } catch (error) {
-    console.error("❌ Profile creation error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(201).json({message:"Create Profile Success!"});
+  } catch (err) {
+    console.error("❌ Error:", err);
+    res.status(500).json({ error: "Failed to create profile" });
   }
 });
+
 
 // ====== GET PROFILE BY USERID ======
 app.get("/profile/:userId", async (req, res) => {
@@ -132,6 +143,9 @@ app.get("/profile/:userId", async (req, res) => {
     res.status(200).json({
       name: profile.name,
       username: profile.username,
+      followers: profile.followers,
+      following: profile.following,
+      trades: profile.trades,
       imageUrl: profile.image
         ? `data:${profile.image.contentType};base64,${profile.image.data.toString("base64")}`
         : null,
@@ -164,6 +178,7 @@ app.post("/upload-item", upload.array("images"), async (req, res) => {
     res.status(500).json({ error: "Upload failed" });
   }
 });
+
 app.get("/items/:category/:title", async (req, res) => {
   try {
     const item = await Item.findOne({
@@ -199,6 +214,68 @@ app.get("/items/:category/:title", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+app.get("/items", async (req, res) => {
+  try {
+    const items = await Item.find();
+
+    const formattedItems = items.map((item) => ({
+      _id: item._id,
+      category: item.category,
+      title: item.title,
+      images: item.images
+        ? item.images
+            .filter((img) => img?.data) // 🔍 กรองค่าที่ไม่มี `data`
+            .map(
+              (img) =>
+                `data:${img.contentType};base64,${img.data.toString("base64")}`
+            )
+        : [], // ถ้าไม่มี images ให้ส่ง array ว่าง
+    }));
+
+    res.status(200).json(formattedItems);
+  } catch (err) {
+    console.error("❌ Fetch error:", err);
+    res.status(500).json({ error: "Failed to fetch items" });
+  }
+});
+
+app.post("/addfollow", async (req, res) => {
+  try {
+    
+    const { username, profilename } = req.body;
+    // ค้นหาผู้ใช้งานที่เป็นเจ้าของโปรไฟล์
+    // const profile = await Profile.findById(profilename);
+    const profile = await Profile.findOne({ username: profilename });
+
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    // เพิ่ม followers ในโปรไฟล์ของผู้ใช้งาน
+    profile.followers += 1;
+
+    // เพิ่ม following ในโปรไฟล์ของ user ที่จะติดตาม
+    // const userProfile = await Profile.findById(username);
+    const userProfile = await Profile.findOne({ username: username });
+
+
+    if (!userProfile) {
+      throw new Error("User profile not found");
+    }
+
+    userProfile.following += 1;
+
+    // บันทึกการอัปเดต
+    await profile.save();
+    await userProfile.save();
+    res.status(200).json({ message: "Follow action completed successfully" });
+  } catch (error) {
+    console.error("❌ Error in follow route:", error);
+    res.status(500).json({ error: "Follow action failed" });
+  }
+});
+
 
 // ====== START SERVER ======
 const PORT = 5001;
