@@ -33,27 +33,13 @@ function Topbar({ setIsLoggedIn }) {
 
   return (
     <>
-      <div
-        style={{
-          top: 0,
-          left: 0,
-          backgroundColor: "white",
-          width: "100%",
-          height: "80px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "0 40px",
-          zIndex: 999,
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-        }}
-      >
+      <div className="bg-white w-full h-20 flex justify-between items-center px-4 overflow-hidden flex-nowrap">
         {/* 🔍 Search */}
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
           <img
             src="/src/assets/icons/Search Normal.png"
             alt="search_icon"
-            style={{ width: "22px", height: "22px", marginLeft: "10px" }}
+            style={{ width: "22px", height: "22px", marginLeft: "40px", marginTop: "4px" }}
           />
           <input
             type="text"
@@ -64,6 +50,7 @@ function Topbar({ setIsLoggedIn }) {
               border: "none",
               borderRadius: "6px",
               outline: "none",
+              marginLeft: "8px"
             }}
           />
         </div>

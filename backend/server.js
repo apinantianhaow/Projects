@@ -11,10 +11,13 @@ app.use(cors({ origin: "http://localhost:5173" }));
 
 // ====== MongoDB Connect ======
 mongoose
-  .connect("mongodb+srv://apxnan:Apinan1234@cluster0.je4ru.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(
+    "mongodb+srv://apxnan:Apinan1234@cluster0.je4ru.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  )
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
@@ -68,7 +71,9 @@ app.post("/register", async (req, res) => {
     const { email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({ email, password: hashedPassword });
-    res.status(200).json({ message: "User registered successfully!", userId: newUser._id });
+    res
+      .status(200)
+      .json({ message: "User registered successfully!", userId: newUser._id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -83,7 +88,8 @@ app.post("/login", async (req, res) => {
     if (!user) return res.status(400).json({ message: "No record existed" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "The password is incorrect" });
+    if (!isMatch)
+      return res.status(400).json({ message: "The password is incorrect" });
 
     res.status(200).json({ message: "Success", userId: user._id });
   } catch (err) {
@@ -94,7 +100,7 @@ app.post("/login", async (req, res) => {
 // ====== CREATE PROFILE ======
 app.post("/profile", upload.single("image"), async (req, res) => {
   try {
-    const { userId, name, username} = req.body;
+    const { userId, name, username } = req.body;
 
     // console.log("Full req.body:", req.body);
     // console.log("Trades:", trades, "Followers:", followers, "Following:", following);
@@ -123,13 +129,12 @@ app.post("/profile", upload.single("image"), async (req, res) => {
       image: imageData,
     });
 
-    res.status(201).json({message:"Create Profile Success!"});
+    res.status(201).json({ message: "Create Profile Success!" });
   } catch (err) {
     console.error("❌ Error:", err);
     res.status(500).json({ error: "Failed to create profile" });
   }
 });
-
 
 // ====== GET PROFILE BY USERID ======
 app.get("/profile/:userId", async (req, res) => {
@@ -147,7 +152,9 @@ app.get("/profile/:userId", async (req, res) => {
       following: profile.following,
       trades: profile.trades,
       imageUrl: profile.image
-        ? `data:${profile.image.contentType};base64,${profile.image.data.toString("base64")}`
+        ? `data:${
+            profile.image.contentType
+          };base64,${profile.image.data.toString("base64")}`
         : null,
     });
   } catch (err) {
@@ -161,7 +168,10 @@ app.post("/upload-item", upload.array("images"), async (req, res) => {
   try {
     const resizedImages = await Promise.all(
       req.files.map(async (file) => ({
-        data: await sharp(file.buffer).resize({ width: 552 }).jpeg({ quality: 80 }).toBuffer(),
+        data: await sharp(file.buffer)
+          .resize({ width: 552 })
+          .jpeg({ quality: 80 })
+          .toBuffer(),
         contentType: file.mimetype,
       }))
     );
@@ -172,7 +182,9 @@ app.post("/upload-item", upload.array("images"), async (req, res) => {
       uploadedBy: req.body.uploadedBy || null,
     });
 
-    res.status(200).json({ message: "Item uploaded successfully", item: newItem });
+    res
+      .status(200)
+      .json({ message: "Item uploaded successfully", item: newItem });
   } catch (error) {
     console.error("❌ Upload error:", error);
     res.status(500).json({ error: "Upload failed" });
@@ -192,8 +204,8 @@ app.get("/items/:category/:title", async (req, res) => {
     const profile = await Profile.findOne({ userId: item.uploadedBy });
 
     // 🔄 แปลงภาพ
-    const imageList = item.images.map((img) =>
-      `data:${img.contentType};base64,${img.data.toString("base64")}`
+    const imageList = item.images.map(
+      (img) => `data:${img.contentType};base64,${img.data.toString("base64")}`
     );
 
     // ✅ รวมข้อมูลทั้งหมดที่ต้องส่งกลับ
@@ -203,7 +215,9 @@ app.get("/items/:category/:title", async (req, res) => {
       uploadedBy: {
         username: profile?.username || "Unknown",
         imageUrl: profile?.image
-          ? `data:${profile.image.contentType};base64,${profile.image.data.toString("base64")}`
+          ? `data:${
+              profile.image.contentType
+            };base64,${profile.image.data.toString("base64")}`
           : null,
       },
     };
@@ -242,7 +256,6 @@ app.get("/items", async (req, res) => {
 
 app.post("/addfollow", async (req, res) => {
   try {
-    
     const { username, profilename } = req.body;
     // ค้นหาผู้ใช้งานที่เป็นเจ้าของโปรไฟล์
     // const profile = await Profile.findById(profilename);
@@ -258,7 +271,6 @@ app.post("/addfollow", async (req, res) => {
     // เพิ่ม following ในโปรไฟล์ของ user ที่จะติดตาม
     // const userProfile = await Profile.findById(username);
     const userProfile = await Profile.findOne({ username: username });
-
 
     if (!userProfile) {
       throw new Error("User profile not found");
@@ -276,7 +288,60 @@ app.post("/addfollow", async (req, res) => {
   }
 });
 
+// ====== Check Email User in databases ======
+app.post("/check-email", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ success: false, error: "Email is required" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    return res.status(200).json({
+      success: true,
+      exists: !!user,
+      message: user ? "Email found." : "Email not found.",
+    });
+  } catch (err) {
+    console.error("❌ Email check error:", err);
+    return res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+});
+
+// ====== Reset-password ======
+app.post("/reset-password", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password are required" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+
+    await user.save(); // Save changes
+
+    return res.status(200).json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error("❌ Reset password error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
 
 // ====== START SERVER ======
 const PORT = 5001;
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+app.listen(PORT, () =>
+  console.log(`🚀 Server running on http://localhost:${PORT}`)
+);

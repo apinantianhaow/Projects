@@ -75,7 +75,7 @@ function Sign() {
           </button>
 
           <div className="mt-4 text-left">
-            <a href="#" className="text-sm text-[#1E1E1E] underline">
+            <a href="/forget-password" className="text-sm text-[#1E1E1E] underline">
               Forgot password?
             </a>
           </div>
