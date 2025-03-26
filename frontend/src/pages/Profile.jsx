@@ -73,7 +73,7 @@ function Profile() {
             <h1 className="text-[24px] font-bold text-[#8D8D9E]">following</h1>
           </div>
         </div>
-        {profile}
+        
         <div className="justify-center ml-[90px]">
           <div
             onClick={() => navigate("/uploadpage")}
