@@ -12,6 +12,7 @@ import RegisterUsername from "./pages/RegisterUsername";
 import RegisterPhoto from "./pages/RegisterPhoto.jsx";
 import Forgetpassword from "./pages/Forgetpassword.jsx";
 import Resetpassword from "./pages/Resetpassword.jsx";
+import ChatApp from "./pages/Chat";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/registerPhoto" element={<RegisterPhoto />} /> 
         <Route path="/forget-password" element={<Forgetpassword/>} />
         <Route path="/reset-password" element={<Resetpassword/>} />
+        <Route path="/chat/:currentUserId/:chattingWithId" element={<ChatRouteWrapper />} />
       </Routes>
     </Router>
   );
