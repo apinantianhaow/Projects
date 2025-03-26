@@ -13,10 +13,12 @@ import RegisterPhoto from "./pages/RegisterPhoto.jsx";
 import Forgetpassword from "./pages/Forgetpassword.jsx";
 import Resetpassword from "./pages/Resetpassword.jsx";
 import RouteWrapper from "./pages/RouteWrapper.jsx";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
