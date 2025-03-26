@@ -4,8 +4,18 @@ const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const sharp = require("sharp");
+const http = require("http");
+const { Server } = require("socket.io");
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+  },
+});
+
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173" }));
 
@@ -31,9 +41,9 @@ const ProfileSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   name: { type: String, required: true },
   username: { type: String, required: true },
-  trades: { type: Number, required: true, default: 0 }, // เพิ่ม field trades
-  followers: { type: Number, required: true, default: 0 }, // เพิ่ม field followers
-  following: { type: Number, required: true, default: 0 }, // เพิ่ม field following
+  trades: { type: Number, required: true, default: 0 },
+  followers: { type: Number, required: true, default: 0 },
+  following: { type: Number, required: true, default: 0 },
   image: {
     data: Buffer,
     contentType: String,
@@ -61,7 +71,6 @@ const ItemSchema = new mongoose.Schema({
 const User = mongoose.model("User", UserSchema);
 const Profile = mongoose.model("Profile", ProfileSchema);
 const Item = mongoose.model("Item", ItemSchema);
-
 // ====== MULTER ======
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -208,7 +217,6 @@ app.get("/items/:category/:title", async (req, res) => {
       (img) => `data:${img.contentType};base64,${img.data.toString("base64")}`
     );
 
-    // ✅ รวมข้อมูลทั้งหมดที่ต้องส่งกลับ
     const result = {
       ...item._doc,
       images: imageList,
@@ -339,9 +347,51 @@ app.post("/reset-password", async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 });
+app.get("/messages/:user1/:user2", async (req, res) => {
+  try {
+    const { user1, user2 } = req.params;
+    const messages = await Message.find({
+      $or: [
+        { senderId: user1, receiverId: user2 },
+        { senderId: user2, receiverId: user1 },
+      ],
+    }).sort("createdAt");
+    res.status(200).json(messages);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/mark-seen", async (req, res) => {
+  try {
+    const { senderId, receiverId } = req.body;
+    await Message.updateMany(
+      { senderId, receiverId, seen: false },
+      { $set: { seen: true } }
+    );
+    res.status(200).json({ message: "Marked as seen" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ====== SOCKET.IO EVENTS ======
+io.on("connection", (socket) => {
+  console.log("🔌 New client connected:", socket.id);
+
+  socket.on("send-message", async (msg) => {
+    console.log("📩 Message received:", msg);
+    const savedMsg = await Message.create(msg);
+    io.emit("receive-message", savedMsg);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("❌ Client disconnected:", socket.id);
+  });
+});
 
 // ====== START SERVER ======
 const PORT = 5001;
-app.listen(PORT, () =>
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-);
+server.listen(PORT, () => {
+  console.log(`🚀 Server + Socket.IO running on http://localhost:${PORT}`);
+});
