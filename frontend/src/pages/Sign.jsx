@@ -11,26 +11,26 @@ function Sign() {
 
   const handleSignIn = async () => {
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await fetch("http://localhost:5001/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
-      
-      if (data === "Success") {
-        localStorage.setItem("user", JSON.stringify({ email })); //save Login status
-        window.location.href = "/"; //refresh for change Navbar to Topbar
+  
+      if (data.message === "Success") {
+        localStorage.setItem("userId", data.userId); // ✅ เก็บ userId
+        localStorage.setItem("user", JSON.stringify({ email }));
+        window.location.href = "/";
       } else {
-        alert(data);
+        alert(data.message);
       }
     } catch (error) {
       console.error("Login Error:", error);
       alert("An error occurred. Please try again.");
     }
   };
+  
 
   return (
     <div>

@@ -43,14 +43,18 @@ function RegisterPhoto() {
   const handleSave = async () => {
     try {
       const formData = new FormData();
+      formData.append("userId", localStorage.getItem("userId"));
       formData.append("name", name);
       formData.append("username", username);
-
+      formData.append("trades", Number(0));
+      formData.append("followers", Number(0));
+      formData.append("following", Number(0));
+      
       if (image) {
         formData.append("image", image);
       }
 
-      const response = await fetch("http://localhost:5000/profile", {
+      const response = await fetch("http://localhost:5001/profile", {
         method: "POST",
         body: formData,
       });

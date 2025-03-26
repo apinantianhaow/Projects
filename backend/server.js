@@ -2,13 +2,14 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
-const multer =  require("multer");
+const multer = require("multer");
 const sharp = require("sharp");
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: "http://localhost:5173" }));
 
+// ====== MongoDB Connect ======
 mongoose
   .connect(
     "mongodb+srv://apxnan:Apinan1234@cluster0.je4ru.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
@@ -17,152 +18,330 @@ mongoose
       useUnifiedTopology: true,
     }
   )
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.error("MongoDB Connection Error:", err));
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
-//Create Schema and Model
+// ====== SCHEMAS ======
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
 });
 
-const profileSchema = new mongoose.Schema({
+const ProfileSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   name: { type: String, required: true },
   username: { type: String, required: true },
+  trades: { type: Number, required: true, default: 0 }, // เพิ่ม field trades
+  followers: { type: Number, required: true, default: 0 }, // เพิ่ม field followers
+  following: { type: Number, required: true, default: 0 }, // เพิ่ม field following
   image: {
     data: Buffer,
     contentType: String,
   },
 });
 
-const PostSchema = new mongoose.Schema({
-  title: String,
+const ItemSchema = new mongoose.Schema({
+  title: { type: String, required: true },
   description: String,
   category: String,
   condition: String,
   desiredItems: String,
   desiredNote: String,
-  images: [String],
-  uploadedBy: mongoose.Schema.Types.ObjectId,
+  images: [
+    {
+      data: Buffer,
+      contentType: String,
+    },
+  ],
+  uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   createdAt: { type: Date, default: Date.now },
 });
 
+// ====== MODELS ======
 const User = mongoose.model("User", UserSchema);
-const Profile = mongoose.model('Profile', profileSchema);
-const Post = mongoose.model("Post", PostSchema);
+const Profile = mongoose.model("Profile", ProfileSchema);
+const Item = mongoose.model("Item", ItemSchema);
 
-// API For Register
+// ====== MULTER ======
+const upload = multer({ storage: multer.memoryStorage() });
+
+// ====== REGISTER ======
 app.post("/register", async (req, res) => {
   try {
     const { email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({ email, password: hashedPassword });
-    res.json({ message: "User registered successfully!", user: newUser });
+    res
+      .status(200)
+      .json({ message: "User registered successfully!", userId: newUser._id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// API For Sign in
+// ====== LOGIN ======
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
-    if (!user) return res.json("No record existed");
+    if (!user) return res.status(400).json({ message: "No record existed" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.json("The password is incorrect");
+    if (!isMatch)
+      return res.status(400).json({ message: "The password is incorrect" });
 
-    res.json("Success");
+    res.status(200).json({ message: "Success", userId: user._id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-//Check Email in Databases
-app.post("/check-email", async (req, res) => {
+// ====== CREATE PROFILE ======
+app.post("/profile", upload.single("image"), async (req, res) => {
   try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
+    const { userId, name, username } = req.body;
 
-    if (user) {
-      res.json({ exists: true });
-    } else {
-      res.json({ exists: false });
+    // console.log("Full req.body:", req.body);
+    // console.log("Trades:", trades, "Followers:", followers, "Following:", following);
+
+    let imageData = null;
+
+    if (req.file) {
+      const imageBuffer = await sharp(req.file.buffer)
+        .resize({ width: 1024 })
+        .jpeg({ quality: 80 })
+        .toBuffer();
+
+      imageData = {
+        data: imageBuffer,
+        contentType: req.file.mimetype,
+      };
     }
+
+    const newProfile = await Profile.create({
+      userId,
+      name,
+      username,
+      followers: 0,
+      following: 0,
+      trades: 0,
+      image: imageData,
+    });
+
+    res.status(201).json({ message: "Create Profile Success!" });
   } catch (err) {
-    console.error("/check-email error:", err);
-    res.status(500).json({ error: "Server error" });
+    console.error("❌ Error:", err);
+    res.status(500).json({ error: "Failed to create profile" });
   }
 });
 
-//API For Reset Password
-app.post("/reset-password", async (req, res) => {
+// ====== GET PROFILE BY USERID ======
+app.get("/profile/:userId", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const profile = await Profile.findOne({ userId: req.params.userId });
+
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    res.status(200).json({
+      name: profile.name,
+      username: profile.username,
+      followers: profile.followers,
+      following: profile.following,
+      trades: profile.trades,
+      imageUrl: profile.image
+        ? `data:${
+            profile.image.contentType
+          };base64,${profile.image.data.toString("base64")}`
+        : null,
+    });
+  } catch (err) {
+    console.error("❌ Profile fetch error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ====== UPLOAD ITEM ======
+app.post("/upload-item", upload.array("images"), async (req, res) => {
+  try {
+    const resizedImages = await Promise.all(
+      req.files.map(async (file) => ({
+        data: await sharp(file.buffer)
+          .resize({ width: 552 })
+          .jpeg({ quality: 80 })
+          .toBuffer(),
+        contentType: file.mimetype,
+      }))
+    );
+
+    const newItem = await Item.create({
+      ...req.body,
+      images: resizedImages,
+      uploadedBy: req.body.uploadedBy || null,
+    });
+
+    res
+      .status(200)
+      .json({ message: "Item uploaded successfully", item: newItem });
+  } catch (error) {
+    console.error("❌ Upload error:", error);
+    res.status(500).json({ error: "Upload failed" });
+  }
+});
+
+app.get("/items/:category/:title", async (req, res) => {
+  try {
+    const item = await Item.findOne({
+      category: req.params.category,
+      title: req.params.title,
+    });
+
+    if (!item) return res.status(404).json({ message: "Item not found" });
+
+    // 🔍 หา profile ของผู้โพสต์
+    const profile = await Profile.findOne({ userId: item.uploadedBy });
+
+    // 🔄 แปลงภาพ
+    const imageList = item.images.map(
+      (img) => `data:${img.contentType};base64,${img.data.toString("base64")}`
+    );
+
+    // ✅ รวมข้อมูลทั้งหมดที่ต้องส่งกลับ
+    const result = {
+      ...item._doc,
+      images: imageList,
+      uploadedBy: {
+        username: profile?.username || "Unknown",
+        imageUrl: profile?.image
+          ? `data:${
+              profile.image.contentType
+            };base64,${profile.image.data.toString("base64")}`
+          : null,
+      },
+    };
+
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("❌ Error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/items", async (req, res) => {
+  try {
+    const items = await Item.find();
+
+    const formattedItems = items.map((item) => ({
+      _id: item._id,
+      category: item.category,
+      title: item.title,
+      images: item.images
+        ? item.images
+            .filter((img) => img?.data) // 🔍 กรองค่าที่ไม่มี `data`
+            .map(
+              (img) =>
+                `data:${img.contentType};base64,${img.data.toString("base64")}`
+            )
+        : [], // ถ้าไม่มี images ให้ส่ง array ว่าง
+    }));
+
+    res.status(200).json(formattedItems);
+  } catch (err) {
+    console.error("❌ Fetch error:", err);
+    res.status(500).json({ error: "Failed to fetch items" });
+  }
+});
+
+app.post("/addfollow", async (req, res) => {
+  try {
+    const { username, profilename } = req.body;
+    // ค้นหาผู้ใช้งานที่เป็นเจ้าของโปรไฟล์
+    // const profile = await Profile.findById(profilename);
+    const profile = await Profile.findOne({ username: profilename });
+
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    // เพิ่ม followers ในโปรไฟล์ของผู้ใช้งาน
+    profile.followers += 1;
+
+    // เพิ่ม following ในโปรไฟล์ของ user ที่จะติดตาม
+    // const userProfile = await Profile.findById(username);
+    const userProfile = await Profile.findOne({ username: username });
+
+    if (!userProfile) {
+      throw new Error("User profile not found");
+    }
+
+    userProfile.following += 1;
+
+    // บันทึกการอัปเดต
+    await profile.save();
+    await userProfile.save();
+    res.status(200).json({ message: "Follow action completed successfully" });
+  } catch (error) {
+    console.error("❌ Error in follow route:", error);
+    res.status(500).json({ error: "Follow action failed" });
+  }
+});
+
+// ====== Check Email User in databases ======
+app.post("/check-email", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ success: false, error: "Email is required" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    return res.status(200).json({
+      success: true,
+      exists: !!user,
+      message: user ? "Email found." : "Email not found.",
+    });
+  } catch (err) {
+    console.error("❌ Email check error:", err);
+    return res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+});
+
+// ====== Reset-password ======
+app.post("/reset-password", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email and password are required" });
+  }
+
+  try {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({ error: "Email not found in the system" });
+      return res.status(404).json({ error: "User not found" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
-    await user.save();
 
-    res.json({ message: "Your password has been reset successfully." });
+    await user.save(); // Save changes
+
+    return res.status(200).json({ message: "Password updated successfully" });
   } catch (err) {
-    console.error("Error in /reset-password: ", err);
-    res.status(500).json({ error: "Server error" });
+    console.error("❌ Reset password error:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 });
 
-app.get("/api/posts", async (req, res) => {
-  try {
-    const posts = await Post.find().sort({ createdAt: -1 });
-    res.json(posts);
-  } catch (err) {
-    console.error("Error fetching posts:", err);
-    res.status(500).json({ error: "Failed to fetch posts" });
-  }
-});
-
-app.use("/uploads", express.static("uploads"));
-
-const upload = multer({ storage: multer.memoryStorage() });
-app.post('/profile', upload.single('image'), async (req, res) => {
-  try {
-    const { name, username } = req.body;
-    let imageBuffer = null;
-    let imageContentType = null;
-
-    if (req.file) {
-      imageBuffer = await sharp(req.file.buffer)
-        .resize({ width: 1024 })  
-        .jpeg({ quality: 80 })    
-        .toBuffer();
-
-        imageData = {
-          data: imageBuffer,
-          contentType: req.file.mimetype,
-        };
-    }
-
-    const newProfile = await Profile.create({
-      name,
-      username,
-      image: imageData,
-    });
-
-    console.log("Save success"); 
-    res.status(200).json({ message: 'Profile created successfully.' });
-  } catch (error) {
-    console.error('Error processing profile:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-//Start Server
-const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// ====== START SERVER ======
+const PORT = 5001;
+app.listen(PORT, () =>
+  console.log(`🚀 Server running on http://localhost:${PORT}`)
+);

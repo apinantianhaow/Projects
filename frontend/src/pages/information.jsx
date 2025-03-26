@@ -1,13 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Background2 from "../components/Background2";
 import Footer from "../components/Footer";
+import { useParams } from "react-router-dom";
 
 function Information() {
-  // 🔹 ตั้งค่า state สำหรับรูปหลัก
-  const [mainImage, setMainImage] = useState("/src/assets/images/exam.png");
+  const { category, title } = useParams();
+  const [item, setItem] = useState(null);
+  const [mainImage, setMainImage] = useState("");
 
-  // 🔹 ฟังก์ชันเปลี่ยนรูป
+  // 🔹 ดึงข้อมูลจาก backend
+  useEffect(() => {
+    const fetchItem = async () => {
+      try {
+        const res = await fetch(`http://localhost:5001/items/${category}/${title}`);
+        const data = await res.json();
+        setItem(data);
+        if (data.images && data.images.length > 0) {
+          setMainImage(data.images[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching item:", error);
+      }
+    };
+  
+    fetchItem();
+  }, [category, title]);
+  
+
   const changeImage = (clickedImage) => {
     setMainImage(clickedImage);
   };
@@ -92,7 +112,6 @@ function Information() {
     },
     collectibles: {
       backgroundColor: "rgba(229, 240, 255, 0.61)",
-      display: "flex",
       alignItems: "center",
       flexWrap: "wrap",
       gap: "10px",
@@ -100,6 +119,7 @@ function Information() {
       width: "350px",
       borderRadius: "20px",
       marginTop: "20px",
+      
     },
     tradeBy: {
       marginTop: "40px",
@@ -120,12 +140,21 @@ function Information() {
     },
   };
 
-  const thumbnails = [
-    "/src/assets/images/exam.png",
-    "/src/assets/images/gojo.png",
-    "/src/assets/images/saiki.png",
-    "/src/assets/images/Baby Saiki🥳.png",
-  ];
+  {
+    item?.images.map((imgSrc, index) => (
+      <img
+        key={index}
+        src={imgSrc}
+        onClick={() => setMainImage(imgSrc)}
+        style={
+          mainImage === imgSrc
+            ? { ...styles.sectionImg, ...styles.activeImage }
+            : styles.sectionImg
+        }
+      />
+    ))
+  }
+
 
   return (
     <div>
@@ -135,11 +164,11 @@ function Information() {
         {/* Section รูปภาพ */}
         <section style={styles.section}>
           <div style={styles.sectionDiv}>
-            {thumbnails.map((imgSrc) => (
+            {item?.images?.map((imgSrc, index) => (
               <img
-                key={imgSrc}
+                key={index}
                 src={imgSrc}
-                alt="thumbnail"
+                alt={`thumbnail-${index}`}
                 onClick={() => changeImage(imgSrc)}
                 style={
                   mainImage === imgSrc
@@ -153,17 +182,15 @@ function Information() {
           <img src={mainImage} alt="main" style={styles.mainImage} />
         </section>
 
-        {/* ข้อมูลเกี่ยวกับสินค้า */}
+        {/* ข้อมูลสินค้า */}
         <aside style={styles.information}>
-          <h1 style={styles.goods}>Kate Domina Art</h1>
+          <h1 style={styles.goods}>{item?.title}</h1>
           <h2 style={styles.textHeader}>Description</h2>
-          <p style={styles.textParagraph}>
-            Was purchased at an Art Battle Championship night on June 24th,
-            2014. It was painted by Kate Domina, whose pieces now fetch between
-            $1000-$3500.
-          </p>
+          <p style={styles.textParagraph}>{item?.description}</p>
+
           <h3 style={styles.textHeader}>Category</h3>
-          <p style={styles.textParagraph}>Art & Handmade</p>
+          <p style={styles.textParagraph}>{item?.category}</p>
+
           <h4 style={styles.textHeader}>
             Condition{" "}
             <img
@@ -172,32 +199,24 @@ function Information() {
               style={styles.circle}
             />
           </h4>
-          <p style={styles.textParagraph}>
-            Lightly used and fully functional, but does not include the original
-            packaging or tags.
-          </p>
+          <p style={styles.textParagraph}>{item?.condition}</p>
 
-          {/* รายการสินค้าที่ต้องการแลกเปลี่ยน */}
-          <div>
-            <h5 style={styles.textHeader}>Desired Items</h5>
-            <div style={styles.collectibles}>
-              <img
-                src="/src/assets/icons/Bookmark 2.png"
-                alt="Bookmark"
-                style={{ width: "37px", height: "37px" }}
-              />
-              <h6 style={{ fontSize: "30px", fontWeight: "700" }}>
-                COLLECTIBLES
-              </h6>
-              <p style={styles.textParagraph}>
-                Rabbit plush toy, cute and lovely
-              </p>
-            </div>
+          <h5 style={styles.textHeader}>Desired Items</h5>
+          <div style={styles.collectibles}>
+            <img
+              src="/src/assets/icons/Bookmark 2.png"
+              alt="Bookmark"
+              style={{ width: "37px", height: "37px" }}
+            />
+            <h6 style={{ fontSize: "30px", fontWeight: "700"}}>
+              {item?.desiredItems}
+            </h6>
+            <p style={styles.textParagraph}>{item?.desiredNote}</p>
           </div>
         </aside>
       </div>
 
-      {/* ส่วนของผู้ที่แลกเปลี่ยน */}
+      {/* ส่วนของผู้แลกเปลี่ยน */}
       <article style={{ width: "100%", padding: "40px" }}>
         <h1
           style={{ paddingLeft: "210px", fontSize: "35px", fontWeight: "700" }}
@@ -205,23 +224,21 @@ function Information() {
           Trade by
         </h1>
         <div style={styles.tradeBy}>
-          <a href="https://www.example.com">
-            <img
-              src="https://www.example.com/image.jpg"
-              alt="profile"
-              style={{ width: "50px", height: "50px", borderRadius: "50%" }}
-            />
-          </a>
-          <span style={styles.name}>killua zoldyck</span>
-          <a href="https://www.example.com">
-            <img
-              src="/src/assets/icons/Message Text.png"
-              alt="Message"
-              style={styles.message}
-            />
-          </a>
+          <img
+            src={item?.uploadedBy?.imageUrl || "/src/assets/icons/profile.png"}
+            alt="profile"
+            style={{ width: "100px", height: "100px", borderRadius: "50%" }}
+          />
+
+          <span style={styles.name}>{item?.uploadedBy?.username || "Unknown"}</span>
+          <img
+            src="/src/assets/icons/Message Text.png"
+            alt="Message"
+            style={styles.message}
+          />
         </div>
       </article>
+
       <Footer />
     </div>
   );

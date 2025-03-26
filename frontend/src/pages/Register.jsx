@@ -16,22 +16,24 @@ function Register() {
       return;
     }
     try {
-      const response = await fetch("http://localhost:5000/register", {
+      const response = await fetch("http://localhost:5001/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
       setMessage(data.message);
+  
       if (data.message === "User registered successfully!") {
+        localStorage.setItem("userId", data.userId); 
         setTimeout(() => navigate("/registerUsername"), 1000);
       }
     } catch (error) {
       setMessage("An error occurred. Please try again.");
     }
   };
+  
+  
 
   return (
     <div>
