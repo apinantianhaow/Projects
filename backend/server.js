@@ -265,9 +265,13 @@ app.get("/items", async (req, res) => {
 app.post("/addfollow", async (req, res) => {
   try {
     const { username, profilename } = req.body;
+    console.log("body:", req.body)
+    console.log("User:", username)
+    console.log("Profile:", profilename)
     // ค้นหาผู้ใช้งานที่เป็นเจ้าของโปรไฟล์
     // const profile = await Profile.findById(profilename);
-    const profile = await Profile.findOne({ username: profilename });
+    const profile = await Profile.findOne({ userId: profilename });
+    console.log("Profile:", profile)
 
     if (!profile) {
       throw new Error("Profile not found");
@@ -278,7 +282,7 @@ app.post("/addfollow", async (req, res) => {
 
     // เพิ่ม following ในโปรไฟล์ของ user ที่จะติดตาม
     // const userProfile = await Profile.findById(username);
-    const userProfile = await Profile.findOne({ username: username });
+    const userProfile = await Profile.findOne({ userId: username });
 
     if (!userProfile) {
       throw new Error("User profile not found");
