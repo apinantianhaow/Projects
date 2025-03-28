@@ -89,7 +89,7 @@ function Information() {
       fontFamily: "'Inter', sans-serif",
       fontWeight: "400",
       color: "rgba(0, 0, 0, 1)",
-      marginLeft: "30px"
+      marginLeft: "30px",
     },
     textHeader: {
       fontSize: "30px",
@@ -113,6 +113,9 @@ function Information() {
       width: "20px",
       height: "20px",
       alignItems: "center",
+      borderRadius: "50%",
+      display: "inline-block",
+      marginLeft: "6px",
     },
     collectibles: {
       backgroundColor: "rgba(229, 240, 255, 0.61)",
@@ -151,7 +154,7 @@ function Information() {
           textAlign: "center",
           marginTop: "200px",
           fontSize: "30px",
-          fontFamily: "'Kaisei HarunoUmi', serif"
+          fontFamily: "'Kaisei HarunoUmi', serif",
         }}
       >
         Loading information...
@@ -182,19 +185,19 @@ function Information() {
                 />
               ))}
           </div>
-          {/* รูปหลัก */}
-          {mainImage ? (
-            <img src={mainImage} alt="main" style={styles.mainImage} />
-          ) : (
-            <img src="/fallback.jpg" alt="default" style={styles.mainImage} />
-          )}
+          <img
+            src={mainImage || "/fallback.jpg"}
+            alt="main"
+            style={styles.mainImage}
+          />
         </section>
 
-        {/* ข้อมูลสินค้า */}
         <aside style={styles.information}>
           <h1 style={styles.goods}>{item.title}</h1>
           <h2 style={styles.textHeader}>Description</h2>
-          <p style={{...styles.textParagraph, whiteSpace: 'pre-wrap' }}>{item.description}</p>
+          <p style={{ ...styles.textParagraph, whiteSpace: "pre-wrap" }}>
+            {item.description}
+          </p>
 
           <h3 style={styles.textHeader}>Category</h3>
           <p style={styles.textParagraph}>{item.category}</p>
@@ -208,6 +211,9 @@ function Information() {
             />
           </h4>
           <p style={styles.textParagraph}>{item.condition}</p>
+          {item.conditionNote && (
+            <p style={styles.textParagraph}>{item.conditionNote}</p>
+          )}
 
           <h5 style={styles.textHeader}>Desired Items</h5>
           <div style={styles.collectibles}>
@@ -224,10 +230,14 @@ function Information() {
         </aside>
       </div>
 
-      {/* ส่วนของผู้แลกเปลี่ยน */}
       <article style={{ width: "100%", padding: "40px" }}>
         <h1
-          style={{ paddingLeft: "210px", fontSize: "35px", fontWeight: "700", marginTop: "60px" }}
+          style={{
+            paddingLeft: "210px",
+            fontSize: "35px",
+            fontWeight: "700",
+            marginTop: "60px",
+          }}
         >
           Trade by
         </h1>
@@ -247,7 +257,6 @@ function Information() {
           />
         </div>
       </article>
-
       <Footer />
     </div>
   );

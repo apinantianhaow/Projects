@@ -30,7 +30,8 @@ function UploadPage() {
     formData.append("title", title);
     formData.append("description", description);
     formData.append("category", selectedCategory);
-    formData.append("condition", conditionNote);
+    formData.append("condition", selectedCondition);
+    formData.append("conditionNote", conditionNote);
     formData.append("desiredItems", selectedDesiredItem);
     formData.append("desiredNote", desiredNote);
     formData.append("uploadedBy", userId);

@@ -444,7 +444,7 @@ app.post("/delete-items", async (req, res) => {
   const { item1, item2 } = req.body;
   try {
     await Item.deleteMany({ _id: { $in: [item1, item2] } });
-    res.status(200).json({ message: "Items deleted successfully" });
+    res.status(200).json({ message: "แลกเปลี่ยนสำเร็จ 😎🔥🫶" });
   } catch (err) {
     console.error("❌ Delete items error:", err);
     res.status(500).json({ error: "Failed to delete items" });
@@ -498,10 +498,47 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("selected-item", { userId, itemId });
   });
 
+  socket.on("request-exchange-status", async ({ userId, targetId }) => {
+    try {
+      console.log("📥 request-exchange-status:", userId, targetId);
+
+      // ดึงค่าจาก DB
+      const Selection = mongoose.model("Selection");
+      const targetConfirm = await Selection.findOne({ userId: targetId });
+
+      if (targetConfirm) {
+        socket.emit("exchange-confirm", {
+        userId: targetId, 
+        targetId: userId,       
+        confirm: true,
+        });
+      }
+    } catch (err) {
+      console.error("❌ Error in request-exchange-status:", err);
+    }
+  });
+  socket.on("reset-exchange-status", ({ userId, targetId }) => {
+    io.emit("exchange-confirm", { userId, confirm: false });
+  });  
+  socket.on("exchange-confirm", ({ userId, targetId, confirm }) => {
+    socket.broadcast.emit("exchange-confirm", { userId, confirm });
+  });
+  socket.on("exchange-done", ({ userId, targetId }) => {
+    console.log("📢 exchange-done from:", userId, "to:", targetId);
+    
+    // ส่งให้ผู้ใช้ทั้งสอง
+    io.to(socket.id).emit("exchange-done", { userId, targetId }); // ให้คนส่งได้ด้วย
+    socket.to(targetId).emit("exchange-done", { userId, targetId }); // ให้เป้าหมายด้วย
+  });
+  
+  
+  
+
   socket.on("disconnect", () => {
     console.log("❌ Client disconnected:", socket.id);
   });
 });
+
 
 const PORT = 5001;
 server.listen(PORT, () => {
