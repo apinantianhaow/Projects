@@ -3,9 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 
 function Postprofile({ category: propCategory }) {
   const navigate = useNavigate();
-  const { category: routeCategory } = useParams(); // รับจาก URL ถ้าไม่มี props
-
-  const category = propCategory || routeCategory; // ใช้ props ก่อน, fallback เป็น route
+  const { category: routeCategory } = useParams();
+  const category = propCategory || routeCategory;
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
@@ -18,6 +17,7 @@ function Postprofile({ category: propCategory }) {
           id: item._id,
           category: item.category?.toLowerCase(),
           title: item.title,
+          slug: item.slug, // ✅ สร้าง slug จาก title
           img: item.images?.[0] || "src/assets/images/default.png",
         }));
 
@@ -37,7 +37,7 @@ function Postprofile({ category: propCategory }) {
   }, [category]);
 
   return (
-    <div className="w-full min-h-auto h-fit bg-cover bg-center flex flex-col py-[25px] px-4 mt-6.5">
+    <div className="w-full min-h-auto h-fit bg-cover bg-center flex flex-col py-[25px] px-4 mt-[26px]">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-[40px] gap-x-[25px] max-w-[1900px] mx-auto">
         {products.map((product, index) => (
           <div
@@ -46,7 +46,8 @@ function Postprofile({ category: propCategory }) {
           >
             <div
               className="w-full h-[300px] rounded-2xl overflow-hidden cursor-pointer"
-              onClick={() => navigate(`/${product.category}/${product.title}`)}
+              // ✅ navigate ไปยังเส้นทาง slug
+              onClick={() => navigate(`/items/${product.category}/${product.slug}`)}
             >
               <img
                 src={product.img || "src/assets/images/default.png"}

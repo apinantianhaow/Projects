@@ -5,34 +5,36 @@ import Footer from "../components/Footer";
 import { useParams } from "react-router-dom";
 
 function Information() {
-  const { category, title } = useParams();
+  const { category, titleSlug } = useParams();
   const [item, setItem] = useState(null);
   const [mainImage, setMainImage] = useState("");
 
-  // 🔹 ดึงข้อมูลจาก backend
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const res = await fetch(`http://localhost:5001/items/${category}/${title}`);
+        const res = await fetch(
+          `http://localhost:5001/items/${category}/${titleSlug}`
+        );
+        if (!res.ok) {
+          throw new Error(`Item not found: ${res.status}`);
+        }
         const data = await res.json();
         setItem(data);
-        if (data.images && data.images.length > 0) {
+        if (Array.isArray(data.images) && data.images.length > 0) {
           setMainImage(data.images[0]);
         }
       } catch (error) {
         console.error("Error fetching item:", error);
       }
     };
-  
+
     fetchItem();
-  }, [category, title]);
-  
+  }, [category, titleSlug]);
 
   const changeImage = (clickedImage) => {
     setMainImage(clickedImage);
   };
 
-  // 🔹 กำหนดสไตล์ object ตาม CSS เดิม
   const styles = {
     container: {
       display: "flex",
@@ -40,7 +42,7 @@ function Information() {
       alignItems: "flex-start",
       gap: "20px",
       maxWidth: "2000px",
-      marginTop: "120px",
+      marginTop: "80px",
     },
     section: {
       display: "flex",
@@ -74,9 +76,10 @@ function Information() {
       height: "800px",
       borderRadius: "20px",
       transition: "opacity 0.3s ease-in-out",
+      marginLeft: "60px",
     },
     information: {
-      marginTop: "100px",
+      marginTop: "70px",
       flexBasis: "35%",
       maxWidth: "1200px",
       marginLeft: "50px",
@@ -84,15 +87,16 @@ function Information() {
     goods: {
       fontSize: "55px",
       fontFamily: "'Inter', sans-serif",
-      fontWeight: "700",
+      fontWeight: "400",
       color: "rgba(0, 0, 0, 1)",
+      marginLeft: "30px"
     },
     textHeader: {
-      fontSize: "35px",
+      fontSize: "30px",
       fontFamily: "'Inter', sans-serif",
       fontWeight: "700",
       color: "rgb(0, 0, 0)",
-      marginTop: "40px",
+      marginTop: "30px",
       lineHeight: "1.5",
       display: "inline-flex",
       alignItems: "center",
@@ -119,10 +123,9 @@ function Information() {
       width: "350px",
       borderRadius: "20px",
       marginTop: "20px",
-      
     },
     tradeBy: {
-      marginTop: "40px",
+      marginTop: "30px",
       display: "flex",
       gap: "20px",
       alignItems: "center",
@@ -140,21 +143,21 @@ function Information() {
     },
   };
 
-  {
-    item?.images.map((imgSrc, index) => (
-      <img
-        key={index}
-        src={imgSrc}
-        onClick={() => setMainImage(imgSrc)}
-        style={
-          mainImage === imgSrc
-            ? { ...styles.sectionImg, ...styles.activeImage }
-            : styles.sectionImg
-        }
-      />
-    ))
+  // 🔸 Fallback UI ขณะโหลด
+  if (!item) {
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          marginTop: "200px",
+          fontSize: "30px",
+          fontFamily: "'Kaisei HarunoUmi', serif"
+        }}
+      >
+        Loading information...
+      </div>
+    );
   }
-
 
   return (
     <div>
@@ -164,32 +167,37 @@ function Information() {
         {/* Section รูปภาพ */}
         <section style={styles.section}>
           <div style={styles.sectionDiv}>
-            {item?.images?.map((imgSrc, index) => (
-              <img
-                key={index}
-                src={imgSrc}
-                alt={`thumbnail-${index}`}
-                onClick={() => changeImage(imgSrc)}
-                style={
-                  mainImage === imgSrc
-                    ? { ...styles.sectionImg, ...styles.activeImage }
-                    : styles.sectionImg
-                }
-              />
-            ))}
+            {Array.isArray(item.images) &&
+              item.images.map((imgSrc, index) => (
+                <img
+                  key={index}
+                  src={imgSrc || "/fallback.jpg"}
+                  alt={`thumbnail-${index}`}
+                  onClick={() => changeImage(imgSrc)}
+                  style={
+                    mainImage === imgSrc
+                      ? { ...styles.sectionImg, ...styles.activeImage }
+                      : styles.sectionImg
+                  }
+                />
+              ))}
           </div>
           {/* รูปหลัก */}
-          <img src={mainImage} alt="main" style={styles.mainImage} />
+          {mainImage ? (
+            <img src={mainImage} alt="main" style={styles.mainImage} />
+          ) : (
+            <img src="/fallback.jpg" alt="default" style={styles.mainImage} />
+          )}
         </section>
 
         {/* ข้อมูลสินค้า */}
         <aside style={styles.information}>
-          <h1 style={styles.goods}>{item?.title}</h1>
+          <h1 style={styles.goods}>{item.title}</h1>
           <h2 style={styles.textHeader}>Description</h2>
-          <p style={styles.textParagraph}>{item?.description}</p>
+          <p style={styles.textParagraph}>{item.description}</p>
 
           <h3 style={styles.textHeader}>Category</h3>
-          <p style={styles.textParagraph}>{item?.category}</p>
+          <p style={styles.textParagraph}>{item.category}</p>
 
           <h4 style={styles.textHeader}>
             Condition{" "}
@@ -199,7 +207,7 @@ function Information() {
               style={styles.circle}
             />
           </h4>
-          <p style={styles.textParagraph}>{item?.condition}</p>
+          <p style={styles.textParagraph}>{item.condition}</p>
 
           <h5 style={styles.textHeader}>Desired Items</h5>
           <div style={styles.collectibles}>
@@ -208,10 +216,10 @@ function Information() {
               alt="Bookmark"
               style={{ width: "37px", height: "37px" }}
             />
-            <h6 style={{ fontSize: "30px", fontWeight: "700"}}>
-              {item?.desiredItems}
+            <h6 style={{ fontSize: "30px", fontWeight: "700" }}>
+              {item.desiredItems}
             </h6>
-            <p style={styles.textParagraph}>{item?.desiredNote}</p>
+            <p style={styles.textParagraph}>{item.desiredNote}</p>
           </div>
         </aside>
       </div>
@@ -219,18 +227,19 @@ function Information() {
       {/* ส่วนของผู้แลกเปลี่ยน */}
       <article style={{ width: "100%", padding: "40px" }}>
         <h1
-          style={{ paddingLeft: "210px", fontSize: "35px", fontWeight: "700" }}
+          style={{ paddingLeft: "210px", fontSize: "35px", fontWeight: "700", marginTop: "60px" }}
         >
           Trade by
         </h1>
         <div style={styles.tradeBy}>
           <img
-            src={item?.uploadedBy?.imageUrl || "/src/assets/icons/profile.png"}
+            src={item.uploadedBy?.imageUrl || "/src/assets/icons/profile.png"}
             alt="profile"
             style={{ width: "100px", height: "100px", borderRadius: "50%" }}
           />
-
-          <span style={styles.name}>{item?.uploadedBy?.username || "Unknown"}</span>
+          <span style={styles.name}>
+            {item.uploadedBy?.username || "Unknown"}
+          </span>
           <img
             src="/src/assets/icons/Message Text.png"
             alt="Message"

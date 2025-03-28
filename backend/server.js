@@ -6,6 +6,7 @@ const multer = require("multer");
 const sharp = require("sharp");
 const http = require("http");
 const { Server } = require("socket.io");
+const slugify = require("slugify");
 
 const app = express();
 const server = http.createServer(app);
@@ -52,6 +53,7 @@ const ProfileSchema = new mongoose.Schema({
 
 const ItemSchema = new mongoose.Schema({
   title: { type: String, required: true },
+  slug: { type: String, required: true },
   description: String,
   category: String,
   condition: String,
@@ -187,6 +189,7 @@ app.post("/upload-item", upload.array("images"), async (req, res) => {
 
     const newItem = await Item.create({
       ...req.body,
+      slug: slugify(req.body.title, { lower: true }),
       images: resizedImages,
       uploadedBy: req.body.uploadedBy || null,
     });
@@ -200,14 +203,24 @@ app.post("/upload-item", upload.array("images"), async (req, res) => {
   }
 });
 
-app.get("/items/:category/:title", async (req, res) => {
+app.get("/items/:category/:titleSlug", async (req, res) => {
+  console.log("ITEM ROUTE HIT");
   try {
+    const { category, titleSlug } = req.params;
+
+    console.log("Incoming request:");
+    console.log("Category:", category);
+    console.log("Slug:", titleSlug); // ใช้ slug ในการค้นหา
+
     const item = await Item.findOne({
-      category: req.params.category,
-      title: req.params.title,
+      category: new RegExp(`^${category}$`, 'i'), // ✅ ไม่สนตัวพิมพ์เล็ก-ใหญ่
+      slug: titleSlug,
     });
 
-    if (!item) return res.status(404).json({ message: "Item not found" });
+    if (!item) {
+      console.log("❌ Item not found");
+      return res.status(404).json({ message: "Item not found" });
+    }
 
     // 🔍 หา profile ของผู้โพสต์
     const profile = await Profile.findOne({ userId: item.uploadedBy });
@@ -223,9 +236,7 @@ app.get("/items/:category/:title", async (req, res) => {
       uploadedBy: {
         username: profile?.username || "Unknown",
         imageUrl: profile?.image
-          ? `data:${
-              profile.image.contentType
-            };base64,${profile.image.data.toString("base64")}`
+          ? `data:${profile.image.contentType};base64,${profile.image.data.toString("base64")}`
           : null,
       },
     };
@@ -245,6 +256,7 @@ app.get("/items", async (req, res) => {
       _id: item._id,
       category: item.category,
       title: item.title,
+      slug: item.slug,
       images: item.images
         ? item.images
             .filter((img) => img?.data) // 🔍 กรองค่าที่ไม่มี `data`
@@ -265,13 +277,13 @@ app.get("/items", async (req, res) => {
 app.post("/addfollow", async (req, res) => {
   try {
     const { username, profilename } = req.body;
-    console.log("body:", req.body)
-    console.log("User:", username)
-    console.log("Profile:", profilename)
+    console.log("body:", req.body);
+    console.log("User:", username);
+    console.log("Profile:", profilename);
     // ค้นหาผู้ใช้งานที่เป็นเจ้าของโปรไฟล์
     // const profile = await Profile.findById(profilename);
     const profile = await Profile.findOne({ userId: profilename });
-    console.log("Profile:", profile)
+    console.log("Profile:", profile);
 
     if (!profile) {
       throw new Error("Profile not found");
@@ -350,17 +362,19 @@ app.post("/reset-password", async (req, res) => {
     console.error("❌ Reset password error:", err);
     return res.status(500).json({ error: "Server error" });
   }
- 
 });
 
- // chat
- const Message = mongoose.model("Message", new mongoose.Schema({
-  senderId: String,
-  receiverId: String,
-  text: String,
-  createdAt: { type: Date, default: Date.now },
-  seen: { type: Boolean, default: false },
-}));
+// chat
+const Message = mongoose.model(
+  "Message",
+  new mongoose.Schema({
+    senderId: String,
+    receiverId: String,
+    text: String,
+    createdAt: { type: Date, default: Date.now },
+    seen: { type: Boolean, default: false },
+  })
+);
 
 app.get("/messages/:user1/:user2", async (req, res) => {
   try {
@@ -380,10 +394,11 @@ app.get("/messages/:user1/:user2", async (req, res) => {
 
     res.status(200).json(messages);
   } catch (err) {
-    console.error("❌ Message fetch error:", err); 
+    console.error("❌ Message fetch error:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 app.post("/delete-items", async (req, res) => {
   const { item1, item2 } = req.body;
   try {
@@ -394,6 +409,7 @@ app.post("/delete-items", async (req, res) => {
     res.status(500).json({ error: "Failed to delete items" });
   }
 });
+
 app.get("/items-by-user/:userId", async (req, res) => {
   try {
     const items = await Item.find({ uploadedBy: req.params.userId });
@@ -401,7 +417,9 @@ app.get("/items-by-user/:userId", async (req, res) => {
     const formattedItems = items.map((item) => ({
       _id: item._id,
       title: item.title,
-      images: item.images.map((img) => `data:${img.contentType};base64,${img.data.toString("base64")}`),
+      images: item.images.map(
+        (img) => `data:${img.contentType};base64,${img.data.toString("base64")}`
+      ),
     }));
 
     res.status(200).json(formattedItems);
@@ -410,9 +428,6 @@ app.get("/items-by-user/:userId", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch items by user" });
   }
 });
-
-
-
 
 app.post("/mark-seen", async (req, res) => {
   try {
