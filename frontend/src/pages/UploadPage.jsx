@@ -18,24 +18,23 @@ function UploadPage() {
   const [title, setTitle] = useState("");
   const [showModal, setShowModal] = useState(null);
   const [userId, setUserId] = useState("");
+  const [description, setDescription] = useState("");
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
     setUserId(id);
   }, []);
 
-
   const handlePost = async () => {
     const formData = new FormData();
     formData.append("title", title);
-    formData.append("description", conditionNote); // ใช้ description จาก conditionNote
+    formData.append("description", description);
     formData.append("category", selectedCategory);
-    formData.append("condition", selectedCondition);
+    formData.append("condition", conditionNote);
     formData.append("desiredItems", selectedDesiredItem);
     formData.append("desiredNote", desiredNote);
-    formData.append("uploadedBy", userId); 
-   
-    
+    formData.append("uploadedBy", userId);
+
     if (images && images.length > 0) {
       for (let i = 0; i < images.length; i++) {
         formData.append("images", images[i]);
@@ -68,7 +67,6 @@ function UploadPage() {
       <Background2 />
       <div className="flex justify-center items-center min-h-screen bg-white p-4">
         <div className="w-full max-w-6xl bg-white p-6 rounded-lg flex flex-wrap md:flex-nowrap md:space-x-16">
-
           {/* อัพโหลดภาพ */}
           <div className="flex justify-center w-full md:w-auto">
             <ImageUploader setImages={setImages} />
@@ -76,7 +74,6 @@ function UploadPage() {
 
           {/* กรอกข้อมูล */}
           <div className="w-full md:w-1/2 flex flex-col space-y-4 mt-6 md:mt-0">
-
             {/* Title */}
             <div>
               <h2 className="font-semibold text-[28px] mt-[130px]">Title</h2>
@@ -93,21 +90,25 @@ function UploadPage() {
             </div>
 
             {/* Description */}
-            <div>
-              <label className="font-semibold text-[28px]">Description</label>
-              <textarea
-                className="w-full bg-[#D9D9D9] text-black rounded-[20px] p-4 text-lg outline-none border-none resize-none overflow-hidden mt-[10px]"
-                placeholder="Describe your item or write your public message"
-                onInput={(e) => {
-                  e.target.style.height = "auto";
-                  e.target.style.height = `${e.target.scrollHeight}px`;
-                }}
-              ></textarea>
-            </div>
+              <div>
+                <label className="font-semibold text-[28px]">Description</label>
+                <textarea
+                  className="w-full bg-[#D9D9D9] text-black rounded-[20px] p-4 text-lg outline-none border-none resize-none overflow-hidden mt-[10px]"
+                  placeholder="Describe your item or write your public message"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  onInput={(e) => {
+                    e.target.style.height = "auto";
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
+                ></textarea>
+              </div>
 
             {/* Category */}
             <div className="flex justify-between items-center w-full">
-              <label className="font-semibold text-[24px] mt-[10px]">Category</label>
+              <label className="font-semibold text-[24px] mt-[10px]">
+                Category
+              </label>
               <button
                 className="text-purple-600 font-bold text-[24px]  mt-[10px] cursor-pointer"
                 onClick={() => setShowModal("category")}
@@ -122,14 +123,15 @@ function UploadPage() {
                 <label className="font-semibold text-[24px] flex items-center mt-[25px]">
                   Condition
                   <button
-                    className={`ml-3 w-4.5 h-4.5 rounded-full ${selectedCondition === "Like New"
+                    className={`ml-3 w-4.5 h-4.5 rounded-full ${
+                      selectedCondition === "Like New"
                         ? "bg-green-600"
                         : selectedCondition === "Good"
-                          ? "bg-yellow-500"
-                          : selectedCondition === "Poor"
-                            ? "bg-red-600"
-                            : "bg-gray-400"
-                      }`}
+                        ? "bg-yellow-500"
+                        : selectedCondition === "Poor"
+                        ? "bg-red-600"
+                        : "bg-gray-400"
+                    }`}
                     onClick={() => setShowModal("condition")}
                   ></button>
                 </label>

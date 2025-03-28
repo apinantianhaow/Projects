@@ -194,7 +194,7 @@ function Information() {
         <aside style={styles.information}>
           <h1 style={styles.goods}>{item.title}</h1>
           <h2 style={styles.textHeader}>Description</h2>
-          <p style={styles.textParagraph}>{item.description}</p>
+          <p style={{...styles.textParagraph, whiteSpace: 'pre-wrap' }}>{item.description}</p>
 
           <h3 style={styles.textHeader}>Category</h3>
           <p style={styles.textParagraph}>{item.category}</p>
