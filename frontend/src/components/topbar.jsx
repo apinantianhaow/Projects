@@ -73,7 +73,7 @@ function Topbar({ setIsLoggedIn }) {
                 borderRadius: "50%",
                 cursor: "pointer",
               }}
-              onClick={() => navigate("/profile")}
+              onClick={() => navigate(`/profile/${profile.userId}`)}
             />
           )}
 
