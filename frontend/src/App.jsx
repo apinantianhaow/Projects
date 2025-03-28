@@ -27,7 +27,7 @@ function App() {
         <Route path="/profile2" element={<Profile2 />} />
         <Route path="/category/:category" element={<CategoryPage />} />
         <Route path="/uploadpage" element={<UploadPage />} />
-        <Route path="/:category/:title" element={<Information />} />
+        <Route path="/items/:category/:titleSlug" element={<Information />} />
         <Route path="/registerUsername" element={<RegisterUsername />} />
         <Route path="/registerPhoto" element={<RegisterPhoto />} />
         <Route path="/forget-password" element={<Forgetpassword />} />
