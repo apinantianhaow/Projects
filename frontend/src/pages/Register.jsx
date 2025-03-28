@@ -33,8 +33,6 @@ function Register() {
     }
   };
   
-  
-
   return (
     <div>
       <Navbar2 />
