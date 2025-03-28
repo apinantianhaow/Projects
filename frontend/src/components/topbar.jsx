@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSearch } from "../contexts/SearchContext";  // นำเข้า useSearch
+import { useSearch } from "../contexts/SearchContext"; // นำเข้า useSearch
 
 function Topbar({ setIsLoggedIn }) {
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ function Topbar({ setIsLoggedIn }) {
 
   // ฟังก์ชันสำหรับการค้นหา
   const handleChange = (e) => {
-    setSearchTerm(e.target.value);  // ส่งค่าค้นหาขึ้นไปยัง Context
+    setSearchTerm(e.target.value); // ส่งค่าค้นหาขึ้นไปยัง Context
   };
 
   useEffect(() => {
@@ -46,7 +46,12 @@ function Topbar({ setIsLoggedIn }) {
         <img
           src="/src/assets/icons/Search Normal.png"
           alt="search_icon"
-          style={{ width: "22px", height: "22px", marginLeft: "40px", marginTop: "4px" }}
+          style={{
+            width: "22px",
+            height: "22px",
+            marginLeft: "40px",
+            marginTop: "4px",
+          }}
         />
         <input
           type="text"
@@ -57,25 +62,11 @@ function Topbar({ setIsLoggedIn }) {
             border: "none",
             borderRadius: "6px",
             outline: "none",
-            marginLeft: "8px"
+            marginLeft: "8px",
           }}
           onChange={handleChange} // ส่งค่าไปที่ setSearchTerm
         />
       </div>
-
-          {profile?.imageUrl && (
-            <img
-              src={profile.imageUrl}
-              alt="profile"
-              style={{
-                width: "55px",
-                height: "55px",
-                borderRadius: "50%",
-                cursor: "pointer",
-              }}
-              onClick={() => navigate(`/profile/${profile.userId}`)}
-            />
-          )}
 
       {/* 👤 Profile Section */}
       <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
@@ -95,7 +86,7 @@ function Topbar({ setIsLoggedIn }) {
               borderRadius: "50%",
               cursor: "pointer",
             }}
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate(`/profile/${profile.userId}`)}
           />
         )}
 
