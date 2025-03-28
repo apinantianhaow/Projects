@@ -63,6 +63,20 @@ function Topbar({ setIsLoggedIn }) {
         />
       </div>
 
+          {profile?.imageUrl && (
+            <img
+              src={profile.imageUrl}
+              alt="profile"
+              style={{
+                width: "55px",
+                height: "55px",
+                borderRadius: "50%",
+                cursor: "pointer",
+              }}
+              onClick={() => navigate(`/profile/${profile.userId}`)}
+            />
+          )}
+
       {/* 👤 Profile Section */}
       <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
         {profile?.name && (

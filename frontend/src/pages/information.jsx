@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Background2 from "../components/Background2";
 import Footer from "../components/Footer";
-import { useParams } from "react-router-dom";
+import { useParams,useNavigate } from "react-router-dom";
 
 function Information() {
+  const navigate = useNavigate();
   const { category, titleSlug } = useParams();
   const [item, setItem] = useState(null);
   const [mainImage, setMainImage] = useState("");
@@ -241,15 +242,16 @@ function Information() {
         >
           Trade by
         </h1>
-        <div style={styles.tradeBy}>
+        <div style={styles.tradeBy} >
           <img
-            src={item.uploadedBy?.imageUrl || "/src/assets/icons/profile.png"}
-            alt="profile"
-            style={{ width: "100px", height: "100px", borderRadius: "50%" }}
-          />
-          <span style={styles.name}>
-            {item.uploadedBy?.username || "Unknown"}
-          </span>
+              src={item.uploadedBy?.imageUrl || "/src/assets/icons/profile.png"}
+              alt="profile"
+              style={{ width: "100px", height: "100px", borderRadius: "50%" }}
+              onClick={() => navigate(`/profile2/${item.uploadedBy?.userId}`)} className="cursor-pointer"
+            />
+            <span style={styles.name} onClick={() => navigate(`/profile2/${item.uploadedBy?.userId}`)} className="cursor-pointer">
+              {item.uploadedBy?.username || "Unknown"}
+            </span>
           <img
             src="/src/assets/icons/Message Text.png"
             alt="Message"

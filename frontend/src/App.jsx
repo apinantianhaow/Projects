@@ -14,11 +14,30 @@ import Forgetpassword from "./pages/Forgetpassword.jsx";
 import Resetpassword from "./pages/Resetpassword.jsx";
 import RouteWrapper from "./pages/RouteWrapper.jsx";
 import ScrollToTop from "./components/ScrollToTop";
+import PostprofileuserId from "./components/PostprofileuserId";
 
 function App() {
   return (
     <Router>
       <ScrollToTop />
+
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/sign" element={<Sign />} />
+        <Route path="/profile/:userId" element={<Profile />} />
+        <Route path="/profile2/:userId" element={<Profile2 />} />
+        <Route path="/category/:category" element={<CategoryPage />} />
+        <Route path="/uploadpage" element={<UploadPage />} />
+        <Route path="/items/:category/:titleSlug" element={<Information />} />
+        <Route path="/registerUsername" element={<RegisterUsername />} />
+        <Route path="/registerPhoto" element={<RegisterPhoto />} />
+        <Route path="/forget-password" element={<Forgetpassword />} />
+        <Route path="/reset-password" element={<Resetpassword />} />
+        <Route path="/chat/:currentUserId/:chattingWithId" element={<RouteWrapper />} />
+        <Route path="/postprofile/:userId/:category?" element={<PostprofileuserId />} />
+      </Routes>
+
       <SearchProvider> 
         <Routes>
           <Route path="/" element={<Home />} />

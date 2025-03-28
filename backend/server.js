@@ -42,7 +42,7 @@ const ProfileSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   name: { type: String, required: true },
   username: { type: String, required: true },
-  trades: { type: Number, required: true, default: 0 },
+  posts: { type: Number, required: true, default: 0 },
   followers: { type: Number, required: true, default: 0 },
   following: { type: Number, required: true, default: 0 },
   image: {
@@ -156,9 +156,9 @@ app.post("/profile", upload.single("image"), async (req, res) => {
       userId,
       name,
       username,
-      followers: 0,
-      following: 0,
-      trades: 0,
+      followers: Math.max(0, 0),
+      following: Math.max(0, 0),
+      posts: Math.max(0, 0),
       image: imageData,
     });
 
@@ -181,9 +181,9 @@ app.get("/profile/:userId", async (req, res) => {
     res.status(200).json({
       name: profile.name,
       username: profile.username,
-      followers: profile.followers,
-      following: profile.following,
-      trades: profile.trades,
+      followers: Math.max(0, profile.followers),
+      following: Math.max(0, profile.following),
+      posts: Math.max(0, profile.posts),
       imageUrl: profile.image
         ? `data:${
             profile.image.contentType
@@ -215,6 +215,11 @@ app.post("/upload-item", upload.array("images"), async (req, res) => {
       images: resizedImages,
       uploadedBy: req.body.uploadedBy || null,
     });
+
+    await Profile.findOneAndUpdate(
+      { userId: req.body.uploadedBy },
+      { $inc: { posts: 1 } }
+    );
 
     res
       .status(200)
@@ -256,6 +261,7 @@ app.get("/items/:category/:titleSlug", async (req, res) => {
       ...item._doc,
       images: imageList,
       uploadedBy: {
+        userId:item.uploadedBy,
         username: profile?.username || "Unknown",
         imageUrl: profile?.image
           ? `data:${
@@ -298,6 +304,53 @@ app.get("/items", async (req, res) => {
   }
 });
 
+app.get("/items/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;  // ดึง userId จาก URL
+    console.log("user", userId)
+
+    // ตรวจสอบว่า userId เป็น ObjectId หรือไม่
+    if (!mongoose.isValidObjectId(userId)) {
+      return res.status(400).json({ error: "Invalid userId" });
+    }
+
+    const items = await Item.find({ uploadedBy: userId });  // กรองข้อมูลตาม userId
+
+    console.log("items", items)
+
+    const formattedItems = items.map((item) => ({
+      _id: item._id,
+      category: item.category,
+      title: item.title,
+      slug: item.slug,
+      images: item.images
+        ? item.images
+            .filter((img) => img?.data) // กรองค่าที่ไม่มี `data`
+            .map(
+              (img) =>
+                `data:${img.contentType};base64,${img.data.toString("base64")}`
+            )
+        : [], // ถ้าไม่มี images ให้ส่ง array ว่าง
+    }));
+
+    res.status(200).json(formattedItems);
+  } catch (err) {
+    console.error("❌ Fetch error:", err);
+    res.status(500).json({ error: "Failed to fetch items" });
+  }
+});
+
+app.get("/api/item-count/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const count = await Item.countDocuments({ uploadedBy: userId });
+    res.json({ count });
+  } catch (error) {
+    console.error("Count error:", error);
+    res.status(500).json({ error: "Failed to count items" });
+  }
+});
+
 app.post("/addfollow", async (req, res) => {
   try {
     const { username, profilename } = req.body;
@@ -335,6 +388,43 @@ app.post("/addfollow", async (req, res) => {
     res.status(500).json({ error: "Follow action failed" });
   }
 });
+
+app.post("/removefollow", async (req, res) => {
+  try {
+    const { username, profilename } = req.body;
+    console.log("body:", req.body);
+    console.log("User:", username);
+    console.log("Profile:", profilename);
+
+    // ค้นหาผู้ใช้ที่ถูกเลิกติดตาม
+    const profile = await Profile.findOneAndUpdate(
+      { userId: profilename },
+      { $inc: { followers: -1 } },
+      { new: true }
+    );
+
+    if (!profile) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
+
+    // ค้นหาผู้ใช้ที่ทำการเลิกติดตาม
+    const userProfile = await Profile.findOneAndUpdate(
+      { userId: username },
+      { $inc: { following: -1 } },
+      { new: true }
+    );
+
+    if (!userProfile) {
+      return res.status(404).json({ error: "User profile not found" });
+    }
+
+    res.status(200).json({ message: "Unfollow action completed successfully" });
+  } catch (error) {
+    console.error("❌ Error in unfollow route:", error);
+    res.status(500).json({ error: "Unfollow action failed" });
+  }
+});
+
 
 // ====== Check Email User in databases ======
 app.post("/check-email", async (req, res) => {
