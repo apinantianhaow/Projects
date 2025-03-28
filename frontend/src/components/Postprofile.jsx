@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useSearch } from "../contexts/SearchContext"; 
 
 function Postprofile({ category: propCategory }) {
   const navigate = useNavigate();
   const { category: routeCategory } = useParams();
   const category = propCategory || routeCategory;
-  const [products, setProducts] = useState([]);
-  const [selectedProductForDelete, setSelectedProductForDelete] =
-    useState(null);
+  const [products, setProducts] = useState([]); // เก็บข้อมูลสินค้า
+  const [selectedProductForDelete, setSelectedProductForDelete] = useState(null);
+
+  const { searchTerm } = useSearch(); // ดึง searchTerm จาก context
+
+  // กรองสินค้าโดยใช้ searchTerm
+  const filteredProducts = products.filter((product) =>
+    product.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleRightClick = (e, productId) => {
     e.preventDefault();
@@ -15,9 +22,7 @@ function Postprofile({ category: propCategory }) {
   };
 
   const handleDelete = async (productId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this item?"
-    );
+    const confirmDelete = window.confirm("Are you sure to delete this item?");
     if (!confirmDelete) return;
 
     try {
@@ -26,7 +31,7 @@ function Postprofile({ category: propCategory }) {
       });
 
       if (res.ok) {
-        setProducts((prev) => prev.filter((p) => p._id !== productId));
+        setProducts((prev) => prev.filter((p) => p._id !== productId)); // ลบสินค้าใน state
         setSelectedProductForDelete(null);
         alert("Item deleted successfully");
       } else {
@@ -53,9 +58,7 @@ function Postprofile({ category: propCategory }) {
         }));
 
         const filteredData = category
-          ? formattedData.filter(
-              (item) => item.category === category.toLowerCase()
-            )
+          ? formattedData.filter((item) => item.category === category.toLowerCase())
           : formattedData;
 
         setProducts(filteredData);
@@ -70,7 +73,7 @@ function Postprofile({ category: propCategory }) {
   return (
     <div className="w-full min-h-auto h-fit bg-cover bg-center flex flex-col py-[25px] px-4 mt-[26px]">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-[40px] gap-x-[25px] max-w-[1900px] mx-auto">
-        {products.map((product, index) => (
+        {filteredProducts.map((product, index) => (
           <div
             key={index}
             className="p-[15px] w-full max-w-[300px] flex flex-col h-[auto] relative"
@@ -78,9 +81,7 @@ function Postprofile({ category: propCategory }) {
           >
             <div
               className="w-full h-[300px] rounded-2xl overflow-hidden cursor-pointer"
-              onClick={() =>
-                navigate(`/items/${product.category}/${product.slug}`)
-              }
+              onClick={() => navigate(`/items/${product.category}/${product.slug}`)}
             >
               <img
                 src={product.img || "src/assets/images/default.png"}

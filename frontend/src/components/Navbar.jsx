@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Topbar from "./topbar";
+import { useSearch } from "../contexts/SearchContext"; // นำเข้า useSearch
 
 function Navbar() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const { searchTerm, setSearchTerm } = useSearch(); // ดึง searchTerm และ setSearchTerm จาก SearchContext
+
+  const handleChange = (e) => {
+    setSearchTerm(e.target.value); // ส่งค่าค้นหาขึ้นไปยัง Context
+  };
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -12,7 +19,7 @@ function Navbar() {
   }, []);
 
   if (isLoggedIn) {
-    return <Topbar setIsLoggedIn={setIsLoggedIn} />; //sent setIsLoggedIn go to Topbar
+    return <Topbar setIsLoggedIn={setIsLoggedIn} />; // ส่ง setIsLoggedIn ไปที่ Topbar
   }
 
   return (
@@ -28,6 +35,8 @@ function Navbar() {
           placeholder="type to search"
           className="w-[100px] sm:w-[150px] md:w-100 px-6 py-1 border-none rounded-md ml-[10px] 
                      focus:outline-none flex-shrink min-w-0"
+          value={searchTerm} // ใช้ searchTerm จาก context
+          onChange={handleChange} // ส่งค่าไปที่ setSearchTerm
         />
       </div>
 
