@@ -38,7 +38,6 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true },
 });
 
-
 const ProfileSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   name: { type: String, required: true },
@@ -71,18 +70,25 @@ const ItemSchema = new mongoose.Schema({
 });
 
 const SelectionSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    unique: true,
+  },
   itemId: { type: String, required: true },
   selectedAt: { type: Date, default: Date.now },
 });
 
-const Message = mongoose.model("Message", new mongoose.Schema({
-  senderId: String,
-  receiverId: String,
-  text: String,
-  createdAt: { type: Date, default: Date.now },
-  seen: { type: Boolean, default: false },
-}));
+const Message = mongoose.model(
+  "Message",
+  new mongoose.Schema({
+    senderId: String,
+    receiverId: String,
+    text: String,
+    createdAt: { type: Date, default: Date.now },
+    seen: { type: Boolean, default: false },
+  })
+);
 
 const User = mongoose.model("User", UserSchema);
 const Profile = mongoose.model("Profile", ProfileSchema);
@@ -234,7 +240,7 @@ app.get("/items/:category/:titleSlug", async (req, res) => {
     console.log("Slug:", titleSlug); // ใช้ slug ในการค้นหา
 
     const item = await Item.findOne({
-      category: new RegExp(`^${category}$`, 'i'), // ✅ ไม่สนตัวพิมพ์เล็ก-ใหญ่
+      category: new RegExp(`^${category}$`, "i"), // ✅ ไม่สนตัวพิมพ์เล็ก-ใหญ่
       slug: titleSlug,
     });
 
@@ -258,7 +264,9 @@ app.get("/items/:category/:titleSlug", async (req, res) => {
         userId:item.uploadedBy,
         username: profile?.username || "Unknown",
         imageUrl: profile?.image
-          ? `data:${profile.image.contentType};base64,${profile.image.data.toString("base64")}`
+          ? `data:${
+              profile.image.contentType
+            };base64,${profile.image.data.toString("base64")}`
           : null,
       },
     };
@@ -470,7 +478,7 @@ app.post("/reset-password", async (req, res) => {
   }
 });
 
- // chat
+// chat
 app.post("/select-item", async (req, res) => {
   try {
     const { userId, itemId } = req.body;
@@ -496,7 +504,9 @@ app.get("/selected-item/:userId", async (req, res) => {
       return res.status(400).json({ error: "Invalid userId" });
     }
 
-    const record = await Selection.findOne({ userId: new Types.ObjectId(userId) });
+    const record = await Selection.findOne({
+      userId: new Types.ObjectId(userId),
+    });
 
     if (!record) return res.status(404).json({ itemId: null });
 
@@ -534,7 +544,7 @@ app.post("/delete-items", async (req, res) => {
   const { item1, item2 } = req.body;
   try {
     await Item.deleteMany({ _id: { $in: [item1, item2] } });
-    res.status(200).json({ message: "Items deleted successfully" });
+    res.status(200).json({ message: "แลกเปลี่ยนสำเร็จ 😎🔥🫶" });
   } catch (err) {
     console.error("❌ Delete items error:", err);
     res.status(500).json({ error: "Failed to delete items" });
@@ -588,11 +598,55 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("selected-item", { userId, itemId });
   });
 
+  socket.on("request-exchange-status", async ({ userId, targetId }) => {
+    try {
+      console.log("📥 request-exchange-status:", userId, targetId);
+
+      // ดึงค่าจาก DB
+      const Selection = mongoose.model("Selection");
+      const targetConfirm = await Selection.findOne({ userId: targetId });
+
+      if (targetConfirm) {
+        socket.emit("exchange-confirm", {
+          userId: targetId,
+          targetId: userId,
+          confirm: true,
+        });
+      }
+    } catch (err) {
+      console.error("❌ Error in request-exchange-status:", err);
+    }
+  });
+  socket.on("reset-exchange-status", ({ userId, targetId }) => {
+    io.emit("exchange-confirm", { userId, confirm: false });
+  });
+  socket.on("exchange-confirm", ({ userId, targetId, confirm }) => {
+    socket.broadcast.emit("exchange-confirm", { userId, confirm });
+  });
+  socket.on("exchange-done", ({ userId, targetId }) => {
+    console.log("📢 exchange-done from:", userId, "to:", targetId);
+
+    // ส่งให้ผู้ใช้ทั้งสอง
+    io.to(socket.id).emit("exchange-done", { userId, targetId }); // ให้คนส่งได้ด้วย
+    socket.to(targetId).emit("exchange-done", { userId, targetId }); // ให้เป้าหมายด้วย
+  });
+
   socket.on("disconnect", () => {
     console.log("❌ Client disconnected:", socket.id);
   });
 });
 
+// ====== Item Delete ======
+app.delete("/items/:id", async (req, res) => {
+  try {
+    await Item.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Item deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete item" });
+  }
+});
+
+// ====== START SERVER ======
 const PORT = 5001;
 server.listen(PORT, () => {
   console.log(`🚀 Server + Socket.IO running on http://localhost:${PORT}`);
