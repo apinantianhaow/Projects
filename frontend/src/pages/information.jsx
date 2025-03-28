@@ -146,7 +146,7 @@ function Information() {
     },
   };
 
-  // 🔸 Fallback UI ขณะโหลด
+  // Fallback UI ขณะโหลด
   if (!item) {
     return (
       <div

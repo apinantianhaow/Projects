@@ -63,7 +63,7 @@ function Postprofile({ category: propCategory }) {
 
         setProducts(filteredData);
       } catch (error) {
-        console.error("❌ Fetch error:", error);
+        console.error("Fetch error:", error);
       }
     };
 

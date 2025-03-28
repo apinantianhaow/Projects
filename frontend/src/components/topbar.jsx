@@ -26,7 +26,7 @@ function Topbar({ setIsLoggedIn }) {
         const data = await res.json();
         setProfile(data);
       } catch (err) {
-        console.error("❌ Load profile failed:", err.message);
+        console.error("Load profile failed:", err.message);
       }
     };
     fetchProfile();

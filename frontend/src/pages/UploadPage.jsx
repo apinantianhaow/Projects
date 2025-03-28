@@ -54,11 +54,11 @@ function UploadPage() {
       if (res.ok) {
         window.location.href = "/profile";
       } else {
-        alert("❌ Upload ผิดพลาด");
+        alert("Upload ผิดพลาด");
       }
     } catch (err) {
       console.error(err);
-      alert("❌ เกิดข้อผิดพลาด");
+      alert("เกิดข้อผิดพลาด");
     }
   };
 
