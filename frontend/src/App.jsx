@@ -25,8 +25,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/sign" element={<Sign />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/profile2" element={<Profile2 />} />
+          <Route path="/profile/:userId" element={<Profile />} />
+          <Route path="/profile2/:userId" element={<Profile2 />} />
           <Route path="/category/:category" element={<CategoryPage />} />
           <Route path="/uploadpage" element={<UploadPage />} />
           <Route path="/items/:category/:titleSlug" element={<Information />} />
