@@ -11,9 +11,9 @@ function ChatApp({ currentUserId, chattingWithId }) {
   const [user1Items, setUser1Items] = useState([]);
   const [user2Items, setUser2Items] = useState([]);
   const [selectedItem1, setSelectedItem1] = useState(null);
-  const [selectedItem2, setSelectedItem2] = useState(null);
+  const [confirmedItem1, setConfirmedItem1] = useState(null);
+  const [confirmedItem2, setConfirmedItem2] = useState(null);
 
-  // ✅ โหลดโปรไฟล์และไอเท็ม
   useEffect(() => {
     const fetchProfile = async (userId) => {
       const res = await fetch(`http://localhost:5001/profile/${userId}`);
@@ -25,39 +25,54 @@ function ChatApp({ currentUserId, chattingWithId }) {
       return await res.json();
     };
 
+    const fetchConfirmed = async () => {
+      try {
+        const res1 = await fetch(`http://localhost:5001/selected-item/${currentUserId}`);
+        const res2 = await fetch(`http://localhost:5001/selected-item/${chattingWithId}`);
+    
+        if (res1.ok) {
+          const data1 = await res1.json();
+          if (data1.itemId) setConfirmedItem1(data1.itemId);
+        } else {
+          console.warn("🔸 currentUser ไม่มี selected-item ในฐานข้อมูล");
+        }
+    
+        if (res2.ok) {
+          const data2 = await res2.json();
+          if (data2.itemId) setConfirmedItem2(data2.itemId);
+        } else {
+          console.warn("🔸 chattingWith ไม่มี selected-item ในฐานข้อมูล");
+        }
+      } catch (err) {
+        console.error("❌ fetchConfirmed error:", err);
+      }
+    };
+    
+    
+
     const load = async () => {
       const current = await fetchProfile(currentUserId);
       const partner = await fetchProfile(chattingWithId);
       const items1 = await fetchItems(currentUserId);
       const items2 = await fetchItems(chattingWithId);
 
-      console.log("🔎 current profile", current);   
-      console.log("🔎 partner profile", partner);   
-
       setCurrentUserProfile(current);
       setChattingWithProfile(partner);
       setUser1Items(items1);
       setUser2Items(items2);
+      await fetchConfirmed();
     };
 
     load();
   }, [currentUserId, chattingWithId]);
 
-  // ✅ โหลดข้อความเก่า
   useEffect(() => {
     fetch(`http://localhost:5001/messages/${currentUserId}/${chattingWithId}`)
       .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setMessages(data);
-        } else {
-          setMessages([]);
-        }
-      })
+      .then((data) => Array.isArray(data) ? setMessages(data) : setMessages([]))
       .catch(() => setMessages([]));
   }, [currentUserId, chattingWithId]);
 
-  // ✅ รับข้อความ real-time
   useEffect(() => {
     const handleReceive = (msg) => {
       if (
@@ -68,24 +83,48 @@ function ChatApp({ currentUserId, chattingWithId }) {
       }
     };
 
+    const handleReceiveItem = ({ userId, itemId }) => {
+      if (userId === chattingWithId) {
+        setConfirmedItem2(itemId);
+      }
+    };
+
     socket.on("receive-message", handleReceive);
-    return () => socket.off("receive-message", handleReceive);
+    socket.on("selected-item", handleReceiveItem);
+
+    return () => {
+      socket.off("receive-message", handleReceive);
+      socket.off("selected-item", handleReceiveItem);
+    };
   }, [currentUserId, chattingWithId]);
 
-  // ✅ ส่งข้อความ
   const sendMessage = (e) => {
     e.preventDefault();
     if (!text.trim()) return;
-
     const msg = { senderId: currentUserId, receiverId: chattingWithId, text };
     socket.emit("send-message", msg);
+    setMessages((prev) => [...prev, { ...msg, createdAt: new Date() }]);
     setText("");
   };
 
-  // ✅ แลกเปลี่ยน
+  const confirmMyItem = async () => {
+    if (!selectedItem1) return;
+    try {
+      setConfirmedItem1(selectedItem1);
+      await fetch("http://localhost:5001/select-item", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: currentUserId, itemId: selectedItem1 }),
+      });
+      socket.emit("selected-item", { userId: currentUserId, itemId: selectedItem1 });
+    } catch (err) {
+      console.error("❌ Error confirming item:", err);
+    }
+  };
+
   const handleExchange = async () => {
-    if (!selectedItem1 || !selectedItem2) {
-      alert("⚠️ กรุณาเลือก item ทั้งสองฝั่งก่อน");
+    if (!confirmedItem1 || !confirmedItem2) {
+      alert("⚠️ กรุณายืนยัน item ทั้งสองฝั่งก่อนแลกเปลี่ยน");
       return;
     }
 
@@ -93,17 +132,15 @@ function ChatApp({ currentUserId, chattingWithId }) {
       const res = await fetch("http://localhost:5001/delete-items", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ item1: selectedItem1, item2: selectedItem2 }),
+        body: JSON.stringify({ item1: confirmedItem1, item2: confirmedItem2 }),
       });
-
       const result = await res.json();
       alert(result.message || "✅ แลกเปลี่ยนสำเร็จ");
-
-      // ลบ item ออกจาก UI
-      setUser1Items((prev) => prev.filter((i) => i._id !== selectedItem1));
-      setUser2Items((prev) => prev.filter((i) => i._id !== selectedItem2));
+      setUser1Items((prev) => prev.filter((i) => i._id !== confirmedItem1));
+      setUser2Items((prev) => prev.filter((i) => i._id !== confirmedItem2));
       setSelectedItem1(null);
-      setSelectedItem2(null);
+      setConfirmedItem1(null);
+      setConfirmedItem2(null);
     } catch (err) {
       console.error(err);
       alert("❌ เกิดข้อผิดพลาดในการแลกเปลี่ยน");
@@ -118,7 +155,6 @@ function ChatApp({ currentUserId, chattingWithId }) {
         {messages.map((m, i) => {
           const isSelf = m.senderId === currentUserId;
           const sender = isSelf ? currentUserProfile : chattingWithProfile;
-
           return (
             <div key={i} style={{ textAlign: isSelf ? "right" : "left", marginBottom: 10 }}>
               {sender?.imageUrl && (
@@ -149,20 +185,35 @@ function ChatApp({ currentUserId, chattingWithId }) {
             </option>
           ))}
         </select>
+        {selectedItem1 && (
+          <button
+            onClick={confirmMyItem}
+            style={{
+              marginLeft: 10,
+              padding: "6px 12px",
+              backgroundColor: confirmedItem1 ? "#4caf50" : "#2196f3",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              transition: "background-color 0.3s, transform 0.1s",
+            }}
+            onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.95)"}
+            onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
+          >
+            {confirmedItem1 ? "✅ เรียบร้อย!" : "✅ ยืนยัน"}
+          </button>
+        )}
 
-        <h4>🎁 เลือก item ของอีกฝ่าย</h4>
-        <select value={selectedItem2 || ""} onChange={(e) => setSelectedItem2(e.target.value)}>
-          <option value="">-- เลือก --</option>
-          {user2Items.map((item) => (
-            <option key={item._id} value={item._id}>
-              {item.title}
-            </option>
-          ))}
-        </select>
+        <h4 style={{ marginTop: 20 }}>🎁 item ของอีกฝ่าย</h4>
+        {confirmedItem2 ? (
+          <p>🕵️ อีกฝ่ายเลือก: <strong>{user2Items.find((i) => i._id === confirmedItem2)?.title || "ไม่พบ item"}</strong></p>
+        ) : (
+          <p>⏳ รออีกฝ่ายเลือก item</p>
+        )}
 
-        <br />
-        <button onClick={handleExchange} style={{ marginTop: 10 }}>
-          ✅ ยืนยันแลกเปลี่ยน
+        <button onClick={handleExchange} style={{ marginTop: 20 }}>
+          🔁 ยืนยันแลกเปลี่ยน
         </button>
       </div>
     </div>
