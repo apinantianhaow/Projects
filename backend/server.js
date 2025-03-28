@@ -29,8 +29,8 @@ mongoose
       useUnifiedTopology: true,
     }
   )
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.error("MongoDB Connection Error:", err));
 
 // ====== SCHEMAS ======
 const UserSchema = new mongoose.Schema({
@@ -164,7 +164,7 @@ app.post("/profile", upload.single("image"), async (req, res) => {
 
     res.status(201).json({ message: "Create Profile Success!" });
   } catch (err) {
-    console.error("❌ Error:", err);
+    console.error("Error:", err);
     res.status(500).json({ error: "Failed to create profile" });
   }
 });
@@ -191,7 +191,7 @@ app.get("/profile/:userId", async (req, res) => {
         : null,
     });
   } catch (err) {
-    console.error("❌ Profile fetch error:", err);
+    console.error("Profile fetch error:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -225,7 +225,7 @@ app.post("/upload-item", upload.array("images"), async (req, res) => {
       .status(200)
       .json({ message: "Item uploaded successfully", item: newItem });
   } catch (error) {
-    console.error("❌ Upload error:", error);
+    console.error("Upload error:", error);
     res.status(500).json({ error: "Upload failed" });
   }
 });
@@ -245,7 +245,7 @@ app.get("/items/:category/:titleSlug", async (req, res) => {
     });
 
     if (!item) {
-      console.log("❌ Item not found");
+      console.log("Item not found");
       return res.status(404).json({ message: "Item not found" });
     }
 
@@ -273,7 +273,7 @@ app.get("/items/:category/:titleSlug", async (req, res) => {
 
     res.status(200).json(result);
   } catch (err) {
-    console.error("❌ Error:", err);
+    console.error("Error:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -289,7 +289,7 @@ app.get("/items", async (req, res) => {
       slug: item.slug,
       images: item.images
         ? item.images
-            .filter((img) => img?.data) // 🔍 กรองค่าที่ไม่มี `data`
+            .filter((img) => img?.data) // กรองค่าที่ไม่มี `data`
             .map(
               (img) =>
                 `data:${img.contentType};base64,${img.data.toString("base64")}`
@@ -299,7 +299,7 @@ app.get("/items", async (req, res) => {
 
     res.status(200).json(formattedItems);
   } catch (err) {
-    console.error("❌ Fetch error:", err);
+    console.error("Fetch error:", err);
     res.status(500).json({ error: "Failed to fetch items" });
   }
 });
@@ -335,7 +335,7 @@ app.get("/items/:userId", async (req, res) => {
 
     res.status(200).json(formattedItems);
   } catch (err) {
-    console.error("❌ Fetch error:", err);
+    console.error("Fetch error:", err);
     res.status(500).json({ error: "Failed to fetch items" });
   }
 });
@@ -384,7 +384,7 @@ app.post("/addfollow", async (req, res) => {
     await userProfile.save();
     res.status(200).json({ message: "Follow action completed successfully" });
   } catch (error) {
-    console.error("❌ Error in follow route:", error);
+    console.error("Error in follow route:", error);
     res.status(500).json({ error: "Follow action failed" });
   }
 });
@@ -420,7 +420,7 @@ app.post("/removefollow", async (req, res) => {
 
     res.status(200).json({ message: "Unfollow action completed successfully" });
   } catch (error) {
-    console.error("❌ Error in unfollow route:", error);
+    console.error("Error in unfollow route:", error);
     res.status(500).json({ error: "Unfollow action failed" });
   }
 });
@@ -443,7 +443,7 @@ app.post("/check-email", async (req, res) => {
       message: user ? "Email found." : "Email not found.",
     });
   } catch (err) {
-    console.error("❌ Email check error:", err);
+    console.error("Email check error:", err);
     return res.status(500).json({
       success: false,
       error: "Internal server error",
@@ -473,7 +473,7 @@ app.post("/reset-password", async (req, res) => {
 
     return res.status(200).json({ message: "Password updated successfully" });
   } catch (err) {
-    console.error("❌ Reset password error:", err);
+    console.error("Reset password error:", err);
     return res.status(500).json({ error: "Server error" });
   }
 });
@@ -487,9 +487,9 @@ app.post("/select-item", async (req, res) => {
       { itemId, selectedAt: new Date() },
       { upsert: true, new: true }
     );
-    res.status(200).json({ message: "✅ Item selected and stored" });
+    res.status(200).json({ message: "Item selected and stored" });
   } catch (err) {
-    res.status(500).json({ error: "❌ Failed to select item" });
+    res.status(500).json({ error: "Failed to select item" });
   }
 });
 
@@ -512,7 +512,7 @@ app.get("/selected-item/:userId", async (req, res) => {
 
     res.status(200).json({ itemId: record.itemId });
   } catch (err) {
-    console.error("❌ Error fetching selected item:", err);
+    console.error("Error fetching selected item:", err);
     res.status(500).json({ error: "Failed to get selected item" });
   }
 });
@@ -535,7 +535,7 @@ app.get("/messages/:user1/:user2", async (req, res) => {
 
     res.status(200).json(messages);
   } catch (err) {
-    console.error("❌ Message fetch error:", err);
+    console.error("Message fetch error:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -544,9 +544,9 @@ app.post("/delete-items", async (req, res) => {
   const { item1, item2 } = req.body;
   try {
     await Item.deleteMany({ _id: { $in: [item1, item2] } });
-    res.status(200).json({ message: "แลกเปลี่ยนสำเร็จ 😎🔥🫶" });
+    res.status(200).json({ message: "แลกเปลี่ยนสำเร็จ" });
   } catch (err) {
-    console.error("❌ Delete items error:", err);
+    console.error("Delete items error:", err);
     res.status(500).json({ error: "Failed to delete items" });
   }
 });
@@ -565,7 +565,7 @@ app.get("/items-by-user/:userId", async (req, res) => {
 
     res.status(200).json(formattedItems);
   } catch (err) {
-    console.error("❌ Error in /items-by-user:", err);
+    console.error("Error in /items-by-user:", err);
     res.status(500).json({ error: "Failed to fetch items by user" });
   }
 });
@@ -585,22 +585,22 @@ app.post("/mark-seen", async (req, res) => {
 
 // ====== SOCKET.IO EVENTS ======
 io.on("connection", (socket) => {
-  console.log("🔌 New client connected:", socket.id);
+  console.log("New client connected:", socket.id);
 
   socket.on("send-message", async (msg) => {
-    console.log("📩 Message received:", msg);
+    console.log("Message received:", msg);
     const savedMsg = await Message.create(msg);
     io.emit("receive-message", savedMsg);
   });
 
   socket.on("selected-item", ({ userId, itemId }) => {
-    console.log("🎯 Real-time selected-item:", userId, itemId);
+    console.log("Real-time selected-item:", userId, itemId);
     socket.broadcast.emit("selected-item", { userId, itemId });
   });
 
   socket.on("request-exchange-status", async ({ userId, targetId }) => {
     try {
-      console.log("📥 request-exchange-status:", userId, targetId);
+      console.log("request-exchange-status:", userId, targetId);
 
       // ดึงค่าจาก DB
       const Selection = mongoose.model("Selection");
@@ -614,7 +614,7 @@ io.on("connection", (socket) => {
         });
       }
     } catch (err) {
-      console.error("❌ Error in request-exchange-status:", err);
+      console.error("Error in request-exchange-status:", err);
     }
   });
   socket.on("reset-exchange-status", ({ userId, targetId }) => {
@@ -624,7 +624,7 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("exchange-confirm", { userId, confirm });
   });
   socket.on("exchange-done", ({ userId, targetId }) => {
-    console.log("📢 exchange-done from:", userId, "to:", targetId);
+    console.log("exchange-done from:", userId, "to:", targetId);
 
     // ส่งให้ผู้ใช้ทั้งสอง
     io.to(socket.id).emit("exchange-done", { userId, targetId }); // ให้คนส่งได้ด้วย
@@ -632,7 +632,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("❌ Client disconnected:", socket.id);
+    console.log("Client disconnected:", socket.id);
   });
 });
 
@@ -649,5 +649,5 @@ app.delete("/items/:id", async (req, res) => {
 // ====== START SERVER ======
 const PORT = 5001;
 server.listen(PORT, () => {
-  console.log(`🚀 Server + Socket.IO running on http://localhost:${PORT}`);
+  console.log(`Server + Socket.IO running on http://localhost:${PORT}`);
 });
