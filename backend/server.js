@@ -58,6 +58,7 @@ const ItemSchema = new mongoose.Schema({
   description: String,
   category: String,
   condition: String,
+  conditionNote: String,
   desiredItems: String,
   desiredNote: String,
   images: [
@@ -179,9 +180,8 @@ app.get("/profile/:userId", async (req, res) => {
       following: profile.following,
       trades: profile.trades,
       imageUrl: profile.image
-        ? `data:${
-            profile.image.contentType
-          };base64,${profile.image.data.toString("base64")}`
+        ? `data:${profile.image.contentType
+        };base64,${profile.image.data.toString("base64")}`
         : null,
     });
   } catch (err) {
@@ -218,51 +218,26 @@ app.post("/upload-item", upload.array("images"), async (req, res) => {
     res.status(500).json({ error: "Upload failed" });
   }
 });
-
-app.get("/items/:category/:titleSlug", async (req, res) => {
-  console.log("ITEM ROUTE HIT");
+app.get("/items/id/:id", async (req, res) => {
   try {
-    const { category, titleSlug } = req.params;
+    const item = await Item.findById(req.params.id);
+    if (!item) return res.status(404).json({ error: "Item not found" });
 
-    console.log("Incoming request:");
-    console.log("Category:", category);
-    console.log("Slug:", titleSlug); // ใช้ slug ในการค้นหา
-
-    const item = await Item.findOne({
-      category: new RegExp(`^${category}$`, 'i'), // ✅ ไม่สนตัวพิมพ์เล็ก-ใหญ่
-      slug: titleSlug,
-    });
-
-    if (!item) {
-      console.log("❌ Item not found");
-      return res.status(404).json({ message: "Item not found" });
-    }
-
-    // 🔍 หา profile ของผู้โพสต์
-    const profile = await Profile.findOne({ userId: item.uploadedBy });
-
-    // 🔄 แปลงภาพ
+    // แปลงรูปภาพ (base64)
     const imageList = item.images.map(
       (img) => `data:${img.contentType};base64,${img.data.toString("base64")}`
     );
 
-    const result = {
+    res.status(200).json({
       ...item._doc,
       images: imageList,
-      uploadedBy: {
-        username: profile?.username || "Unknown",
-        imageUrl: profile?.image
-          ? `data:${profile.image.contentType};base64,${profile.image.data.toString("base64")}`
-          : null,
-      },
-    };
-
-    res.status(200).json(result);
+    });
   } catch (err) {
-    console.error("❌ Error:", err);
-    res.status(500).json({ error: err.message });
+    console.error("❌ Error fetching item by ID:", err);
+    res.status(500).json({ error: "Failed to fetch item" });
   }
 });
+
 
 app.get("/items", async (req, res) => {
   try {
@@ -275,11 +250,11 @@ app.get("/items", async (req, res) => {
       slug: item.slug,
       images: item.images
         ? item.images
-            .filter((img) => img?.data) // 🔍 กรองค่าที่ไม่มี `data`
-            .map(
-              (img) =>
-                `data:${img.contentType};base64,${img.data.toString("base64")}`
-            )
+          .filter((img) => img?.data) // 🔍 กรองค่าที่ไม่มี `data`
+          .map(
+            (img) =>
+              `data:${img.contentType};base64,${img.data.toString("base64")}`
+          )
         : [], // ถ้าไม่มี images ให้ส่ง array ว่าง
     }));
 
@@ -287,44 +262,6 @@ app.get("/items", async (req, res) => {
   } catch (err) {
     console.error("❌ Fetch error:", err);
     res.status(500).json({ error: "Failed to fetch items" });
-  }
-});
-
-app.post("/addfollow", async (req, res) => {
-  try {
-    const { username, profilename } = req.body;
-    console.log("body:", req.body);
-    console.log("User:", username);
-    console.log("Profile:", profilename);
-    // ค้นหาผู้ใช้งานที่เป็นเจ้าของโปรไฟล์
-    // const profile = await Profile.findById(profilename);
-    const profile = await Profile.findOne({ userId: profilename });
-    console.log("Profile:", profile);
-
-    if (!profile) {
-      throw new Error("Profile not found");
-    }
-
-    // เพิ่ม followers ในโปรไฟล์ของผู้ใช้งาน
-    profile.followers += 1;
-
-    // เพิ่ม following ในโปรไฟล์ของ user ที่จะติดตาม
-    // const userProfile = await Profile.findById(username);
-    const userProfile = await Profile.findOne({ userId: username });
-
-    if (!userProfile) {
-      throw new Error("User profile not found");
-    }
-
-    userProfile.following += 1;
-
-    // บันทึกการอัปเดต
-    await profile.save();
-    await userProfile.save();
-    res.status(200).json({ message: "Follow action completed successfully" });
-  } catch (error) {
-    console.error("❌ Error in follow route:", error);
-    res.status(500).json({ error: "Follow action failed" });
   }
 });
 
@@ -380,7 +317,7 @@ app.post("/reset-password", async (req, res) => {
   }
 });
 
- // chat
+// chat
 app.post("/select-item", async (req, res) => {
   try {
     const { userId, itemId } = req.body;
@@ -450,6 +387,59 @@ app.post("/delete-items", async (req, res) => {
     res.status(500).json({ error: "Failed to delete items" });
   }
 });
+app.delete("/delete-item/:id", async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    const item = await Item.findById(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({ error: "Item not found" });
+    }
+
+    // ❗ ตรวจสอบว่า userId ที่ส่งมาตรงกับผู้โพสต์หรือไม่
+    if (item.uploadedBy.toString() !== userId) {
+      return res.status(403).json({ error: "ไม่อนุญาตให้ลบไอเทมนี้" });
+    }
+
+    await item.deleteOne();
+    res.status(200).json({ message: "Item deleted successfully" });
+  } catch (err) {
+    console.error("❌ Delete error:", err);
+    res.status(500).json({ error: "Failed to delete item" });
+  }
+});
+
+app.put("/items/:id", upload.array("images"), async (req, res) => {
+  try {
+    const resizedImages = await Promise.all(
+      req.files.map(async (file) => ({
+        data: await sharp(file.buffer)
+          .resize({ width: 552 })
+          .jpeg({ quality: 80 })
+          .toBuffer(),
+        contentType: file.mimetype,
+      }))
+    );
+
+    const updatedItem = await Item.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...req.body,
+        images: resizedImages,
+        slug: slugify(req.body.title, { lower: true }),
+      },
+      { new: true }
+    );
+
+    res.status(200).json({ message: "Item updated", item: updatedItem });
+  } catch (err) {
+    console.error("❌ Update error:", err);
+    res.status(500).json({ error: "Failed to update item" });
+  }
+});
+
+
 
 app.get("/items-by-user/:userId", async (req, res) => {
   try {
@@ -467,6 +457,89 @@ app.get("/items-by-user/:userId", async (req, res) => {
   } catch (err) {
     console.error("❌ Error in /items-by-user:", err);
     res.status(500).json({ error: "Failed to fetch items by user" });
+  }
+});
+app.get("/items/:category/:titleSlug", async (req, res) => {
+  console.log("ITEM ROUTE HIT");
+  try {
+    const { category, titleSlug } = req.params;
+
+    console.log("Incoming request:");
+    console.log("Category:", category);
+    console.log("Slug:", titleSlug); // ใช้ slug ในการค้นหา
+
+    const item = await Item.findOne({
+      category: new RegExp(`^${category}$`, 'i'), // ✅ ไม่สนตัวพิมพ์เล็ก-ใหญ่
+      slug: titleSlug,
+    });
+
+    if (!item) {
+      console.log("❌ Item not found");
+      return res.status(404).json({ message: "Item not found" });
+    }
+
+    // 🔍 หา profile ของผู้โพสต์
+    const profile = await Profile.findOne({ userId: item.uploadedBy });
+
+    // 🔄 แปลงภาพ
+    const imageList = item.images.map(
+      (img) => `data:${img.contentType};base64,${img.data.toString("base64")}`
+    );
+
+    const result = {
+      ...item._doc,
+      images: imageList,
+      uploadedBy: {
+        username: profile?.username || "Unknown",
+        imageUrl: profile?.image
+          ? `data:${profile.image.contentType};base64,${profile.image.data.toString("base64")}`
+          : null,
+      },
+      uploadedById: item.uploadedBy.toString()
+    };
+
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("❌ Error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/addfollow", async (req, res) => {
+  try {
+    const { username, profilename } = req.body;
+    console.log("body:", req.body);
+    console.log("User:", username);
+    console.log("Profile:", profilename);
+    // ค้นหาผู้ใช้งานที่เป็นเจ้าของโปรไฟล์
+    // const profile = await Profile.findById(profilename);
+    const profile = await Profile.findOne({ userId: profilename });
+    console.log("Profile:", profile);
+
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    // เพิ่ม followers ในโปรไฟล์ของผู้ใช้งาน
+    profile.followers += 1;
+
+    // เพิ่ม following ในโปรไฟล์ของ user ที่จะติดตาม
+    // const userProfile = await Profile.findById(username);
+    const userProfile = await Profile.findOne({ userId: username });
+
+    if (!userProfile) {
+      throw new Error("User profile not found");
+    }
+
+    userProfile.following += 1;
+
+    // บันทึกการอัปเดต
+    await profile.save();
+    await userProfile.save();
+    res.status(200).json({ message: "Follow action completed successfully" });
+  } catch (error) {
+    console.error("❌ Error in follow route:", error);
+    res.status(500).json({ error: "Follow action failed" });
   }
 });
 
@@ -508,9 +581,9 @@ io.on("connection", (socket) => {
 
       if (targetConfirm) {
         socket.emit("exchange-confirm", {
-        userId: targetId, 
-        targetId: userId,       
-        confirm: true,
+          userId: targetId,
+          targetId: userId,
+          confirm: true,
         });
       }
     } catch (err) {
@@ -519,20 +592,23 @@ io.on("connection", (socket) => {
   });
   socket.on("reset-exchange-status", ({ userId, targetId }) => {
     io.emit("exchange-confirm", { userId, confirm: false });
-  });  
+  });
   socket.on("exchange-confirm", ({ userId, targetId, confirm }) => {
-    socket.broadcast.emit("exchange-confirm", { userId, confirm });
+    socket.to(targetId).emit("exchange-confirm", { userId, confirm });
+
+    // ส่งไปยังผู้ใช้ที่ยืนยันตัวเอง
+    socket.emit("exchange-confirm", { userId, confirm });
   });
   socket.on("exchange-done", ({ userId, targetId }) => {
     console.log("📢 exchange-done from:", userId, "to:", targetId);
-    
+
     // ส่งให้ผู้ใช้ทั้งสอง
     io.to(socket.id).emit("exchange-done", { userId, targetId }); // ให้คนส่งได้ด้วย
     socket.to(targetId).emit("exchange-done", { userId, targetId }); // ให้เป้าหมายด้วย
   });
-  
-  
-  
+
+
+
 
   socket.on("disconnect", () => {
     console.log("❌ Client disconnected:", socket.id);

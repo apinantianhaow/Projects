@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Background2 from "../components/Background2";
 import Footer from "../components/Footer";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 function Information() {
   const { category, titleSlug } = useParams();
   const [item, setItem] = useState(null);
   const [mainImage, setMainImage] = useState("");
+  const navigate = useNavigate();
+
+  const currentUserId = localStorage.getItem("userId");
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -33,6 +36,38 @@ function Information() {
 
   const changeImage = (clickedImage) => {
     setMainImage(clickedImage);
+  };
+
+  const handleEdit = () => {
+    navigate(`/edit-item/${item._id}`);
+  };
+
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`http://localhost:5001/delete-item/${item._id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: item.uploadedById, // ต้องให้ backend ตรวจสอบว่าเป็นเจ้าของ
+        }),
+      });
+
+      if (res.ok) {
+        alert("Item deleted successfully!");
+        navigate("/");
+      } else {
+        const data = await res.json();
+        alert(`❌ Failed: ${data.error}`);
+      }
+    } catch (err) {
+      console.error("❌ Delete failed:", err);
+      alert("Error deleting item");
+    }
   };
 
   const styles = {
@@ -113,9 +148,6 @@ function Information() {
       width: "20px",
       height: "20px",
       alignItems: "center",
-      borderRadius: "50%",
-      display: "inline-block",
-      marginLeft: "6px",
     },
     collectibles: {
       backgroundColor: "rgba(229, 240, 255, 0.61)",
@@ -146,7 +178,6 @@ function Information() {
     },
   };
 
-  // 🔸 Fallback UI ขณะโหลด
   if (!item) {
     return (
       <div
@@ -167,7 +198,6 @@ function Information() {
       <Navbar />
       <Background2 />
       <div style={styles.container}>
-        {/* Section รูปภาพ */}
         <section style={styles.section}>
           <div style={styles.sectionDiv}>
             {Array.isArray(item.images) &&
@@ -203,17 +233,24 @@ function Information() {
           <p style={styles.textParagraph}>{item.category}</p>
 
           <h4 style={styles.textHeader}>
-            Condition{" "}
-            <img
-              src="/src/assets/icons/circle.png"
-              alt="circle"
-              style={styles.circle}
-            />
+            Condition
+            <span
+              style={{
+                display: "inline-block",
+                width: "20px",
+                height: "20px",
+                borderRadius: "50%",
+                marginLeft: "10px",
+                backgroundColor:
+                  item.condition === "Like New"
+                    ? "#22c55e" // green-500
+                    : item.condition === "Good"
+                      ? "#facc15" // yellow-400
+                      : "#ef4444" // red-500
+              }}
+            ></span>
           </h4>
-          <p style={styles.textParagraph}>{item.condition}</p>
-          {item.conditionNote && (
-            <p style={styles.textParagraph}>{item.conditionNote}</p>
-          )}
+          <p style={styles.textParagraph}>{item.conditionNote}</p>
 
           <h5 style={styles.textHeader}>Desired Items</h5>
           <div style={styles.collectibles}>
@@ -227,6 +264,54 @@ function Information() {
             </h6>
             <p style={styles.textParagraph}>{item.desiredNote}</p>
           </div>
+
+          {currentUserId === item.uploadedById && (
+            <div style={{ display: "flex", gap: "20px", marginTop: "30px" }}>
+              <button
+                onClick={handleEdit}
+                style={{
+                  padding: "12px 24px",
+                  backgroundColor: "#2196f3",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "18px",
+                  cursor: "pointer",
+                  transition: "background-color 0.3s ease",
+                }}
+                onMouseEnter={(e) =>
+                  (e.target.style.backgroundColor = "#1976d2")
+                }
+                onMouseLeave={(e) =>
+                  (e.target.style.backgroundColor = "#2196f3")
+                }
+              >
+                ✏️ EDIT
+              </button>
+
+              <button
+                onClick={handleDelete}
+                style={{
+                  padding: "12px 24px",
+                  backgroundColor: "#f44336",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "18px",
+                  cursor: "pointer",
+                  transition: "background-color 0.3s ease",
+                }}
+                onMouseEnter={(e) =>
+                  (e.target.style.backgroundColor = "#d32f2f")
+                }
+                onMouseLeave={(e) =>
+                  (e.target.style.backgroundColor = "#f44336")
+                }
+              >
+                🗑️ DELETE
+              </button>
+            </div>
+          )}
         </aside>
       </div>
 
@@ -254,9 +339,11 @@ function Information() {
             src="/src/assets/icons/Message Text.png"
             alt="Message"
             style={styles.message}
+            onClick={() => navigate(`/chat/${currentUserId}/${item.uploadedById}`)}
           />
         </div>
       </article>
+
       <Footer />
     </div>
   );

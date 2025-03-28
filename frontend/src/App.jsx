@@ -14,6 +14,7 @@ import Forgetpassword from "./pages/Forgetpassword.jsx";
 import Resetpassword from "./pages/Resetpassword.jsx";
 import RouteWrapper from "./pages/RouteWrapper.jsx";
 import ScrollToTop from "./components/ScrollToTop";
+import EditItem from "./components/EditItem.jsx";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/forget-password" element={<Forgetpassword />} />
         <Route path="/reset-password" element={<Resetpassword />} />
         <Route path="/chat/:currentUserId/:chattingWithId" element={<RouteWrapper />} />
+        <Route path="/edit-item/:id" element={<EditItem />} />
       </Routes>
     </Router>
   );
