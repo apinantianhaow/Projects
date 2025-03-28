@@ -35,3 +35,7 @@ html, body {
 .font-newsreader {
   font-family: 'Newsreader', serif;
 }
+
+.white-space-pre-line {
+  white-space: pre-line;
+}
