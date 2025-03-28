@@ -350,21 +350,69 @@ app.post("/reset-password", async (req, res) => {
     console.error("❌ Reset password error:", err);
     return res.status(500).json({ error: "Server error" });
   }
+ 
 });
+
+ // chat
+ const Message = mongoose.model("Message", new mongoose.Schema({
+  senderId: String,
+  receiverId: String,
+  text: String,
+  createdAt: { type: Date, default: Date.now },
+  seen: { type: Boolean, default: false },
+}));
+
 app.get("/messages/:user1/:user2", async (req, res) => {
   try {
     const { user1, user2 } = req.params;
+    console.log("📨 Fetching messages between:", user1, user2);
+
+    if (!user1 || !user2) {
+      return res.status(400).json({ error: "Missing user ID(s)" });
+    }
+
     const messages = await Message.find({
       $or: [
         { senderId: user1, receiverId: user2 },
         { senderId: user2, receiverId: user1 },
       ],
     }).sort("createdAt");
+
     res.status(200).json(messages);
   } catch (err) {
+    console.error("❌ Message fetch error:", err); 
     res.status(500).json({ error: err.message });
   }
 });
+app.post("/delete-items", async (req, res) => {
+  const { item1, item2 } = req.body;
+  try {
+    await Item.deleteMany({ _id: { $in: [item1, item2] } });
+    res.status(200).json({ message: "Items deleted successfully" });
+  } catch (err) {
+    console.error("❌ Delete items error:", err);
+    res.status(500).json({ error: "Failed to delete items" });
+  }
+});
+app.get("/items-by-user/:userId", async (req, res) => {
+  try {
+    const items = await Item.find({ uploadedBy: req.params.userId });
+
+    const formattedItems = items.map((item) => ({
+      _id: item._id,
+      title: item.title,
+      images: item.images.map((img) => `data:${img.contentType};base64,${img.data.toString("base64")}`),
+    }));
+
+    res.status(200).json(formattedItems);
+  } catch (err) {
+    console.error("❌ Error in /items-by-user:", err);
+    res.status(500).json({ error: "Failed to fetch items by user" });
+  }
+});
+
+
+
 
 app.post("/mark-seen", async (req, res) => {
   try {
