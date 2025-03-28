@@ -38,6 +38,7 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true },
 });
 
+
 const ProfileSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   name: { type: String, required: true },
@@ -69,10 +70,25 @@ const ItemSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-// ====== MODELS ======
+const SelectionSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true },
+  itemId: { type: String, required: true },
+  selectedAt: { type: Date, default: Date.now },
+});
+
+const Message = mongoose.model("Message", new mongoose.Schema({
+  senderId: String,
+  receiverId: String,
+  text: String,
+  createdAt: { type: Date, default: Date.now },
+  seen: { type: Boolean, default: false },
+}));
+
 const User = mongoose.model("User", UserSchema);
 const Profile = mongoose.model("Profile", ProfileSchema);
 const Item = mongoose.model("Item", ItemSchema);
+const Selection = mongoose.model("Selection", SelectionSchema);
+
 // ====== MULTER ======
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -364,17 +380,42 @@ app.post("/reset-password", async (req, res) => {
   }
 });
 
-// chat
-const Message = mongoose.model(
-  "Message",
-  new mongoose.Schema({
-    senderId: String,
-    receiverId: String,
-    text: String,
-    createdAt: { type: Date, default: Date.now },
-    seen: { type: Boolean, default: false },
-  })
-);
+ // chat
+app.post("/select-item", async (req, res) => {
+  try {
+    const { userId, itemId } = req.body;
+    await Selection.findOneAndUpdate(
+      { userId },
+      { itemId, selectedAt: new Date() },
+      { upsert: true, new: true }
+    );
+    res.status(200).json({ message: "✅ Item selected and stored" });
+  } catch (err) {
+    res.status(500).json({ error: "❌ Failed to select item" });
+  }
+});
+
+// ดึงข้อมูล item ที่ user เลือกไว้ล่าสุด
+const { Types } = require("mongoose");
+
+app.get("/selected-item/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    if (!Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: "Invalid userId" });
+    }
+
+    const record = await Selection.findOne({ userId: new Types.ObjectId(userId) });
+
+    if (!record) return res.status(404).json({ itemId: null });
+
+    res.status(200).json({ itemId: record.itemId });
+  } catch (err) {
+    console.error("❌ Error fetching selected item:", err);
+    res.status(500).json({ error: "Failed to get selected item" });
+  }
+});
 
 app.get("/messages/:user1/:user2", async (req, res) => {
   try {
@@ -452,12 +493,16 @@ io.on("connection", (socket) => {
     io.emit("receive-message", savedMsg);
   });
 
+  socket.on("selected-item", ({ userId, itemId }) => {
+    console.log("🎯 Real-time selected-item:", userId, itemId);
+    socket.broadcast.emit("selected-item", { userId, itemId });
+  });
+
   socket.on("disconnect", () => {
     console.log("❌ Client disconnected:", socket.id);
   });
 });
 
-// ====== START SERVER ======
 const PORT = 5001;
 server.listen(PORT, () => {
   console.log(`🚀 Server + Socket.IO running on http://localhost:${PORT}`);
