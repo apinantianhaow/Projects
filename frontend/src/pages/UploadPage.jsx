@@ -52,13 +52,13 @@ function UploadPage() {
       console.log(result);
 
       if (res.ok) {
-        window.location.href = "/profile";
+        window.location.href = `/profile/${userId}`;
       } else {
-        alert("❌ Upload ผิดพลาด");
+        alert("Upload ผิดพลาด");
       }
     } catch (err) {
       console.error(err);
-      alert("❌ เกิดข้อผิดพลาด");
+      alert("เกิดข้อผิดพลาด");
     }
   };
 

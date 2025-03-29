@@ -180,8 +180,9 @@ app.get("/profile/:userId", async (req, res) => {
       following: profile.following,
       trades: profile.trades,
       imageUrl: profile.image
-        ? `data:${profile.image.contentType
-        };base64,${profile.image.data.toString("base64")}`
+        ? `data:${
+            profile.image.contentType
+          };base64,${profile.image.data.toString("base64")}`
         : null,
     });
   } catch (err) {
@@ -250,11 +251,11 @@ app.get("/items", async (req, res) => {
       slug: item.slug,
       images: item.images
         ? item.images
-          .filter((img) => img?.data) // 🔍 กรองค่าที่ไม่มี `data`
-          .map(
-            (img) =>
-              `data:${img.contentType};base64,${img.data.toString("base64")}`
-          )
+            .filter((img) => img?.data) // 🔍 กรองค่าที่ไม่มี `data`
+            .map(
+              (img) =>
+                `data:${img.contentType};base64,${img.data.toString("base64")}`
+            )
         : [], // ถ้าไม่มี images ให้ส่ง array ว่าง
     }));
 
@@ -317,7 +318,7 @@ app.post("/reset-password", async (req, res) => {
   }
 });
 
-// chat
+ // chat
 app.post("/select-item", async (req, res) => {
   try {
     const { userId, itemId } = req.body;
@@ -558,22 +559,22 @@ app.post("/mark-seen", async (req, res) => {
 
 // ====== SOCKET.IO EVENTS ======
 io.on("connection", (socket) => {
-  console.log("🔌 New client connected:", socket.id);
+  console.log("New client connected:", socket.id);
 
   socket.on("send-message", async (msg) => {
-    console.log("📩 Message received:", msg);
+    console.log("Message received:", msg);
     const savedMsg = await Message.create(msg);
     io.emit("receive-message", savedMsg);
   });
 
   socket.on("selected-item", ({ userId, itemId }) => {
-    console.log("🎯 Real-time selected-item:", userId, itemId);
+    console.log("Real-time selected-item:", userId, itemId);
     socket.broadcast.emit("selected-item", { userId, itemId });
   });
 
   socket.on("request-exchange-status", async ({ userId, targetId }) => {
     try {
-      console.log("📥 request-exchange-status:", userId, targetId);
+      console.log("request-exchange-status:", userId, targetId);
 
       // ดึงค่าจาก DB
       const Selection = mongoose.model("Selection");
@@ -587,36 +588,40 @@ io.on("connection", (socket) => {
         });
       }
     } catch (err) {
-      console.error("❌ Error in request-exchange-status:", err);
+      console.error("Error in request-exchange-status:", err);
     }
   });
   socket.on("reset-exchange-status", ({ userId, targetId }) => {
     io.emit("exchange-confirm", { userId, confirm: false });
   });
   socket.on("exchange-confirm", ({ userId, targetId, confirm }) => {
-    socket.to(targetId).emit("exchange-confirm", { userId, confirm });
-
-    // ส่งไปยังผู้ใช้ที่ยืนยันตัวเอง
-    socket.emit("exchange-confirm", { userId, confirm });
+    socket.broadcast.emit("exchange-confirm", { userId, confirm });
   });
   socket.on("exchange-done", ({ userId, targetId }) => {
-    console.log("📢 exchange-done from:", userId, "to:", targetId);
+    console.log("exchange-done from:", userId, "to:", targetId);
 
     // ส่งให้ผู้ใช้ทั้งสอง
     io.to(socket.id).emit("exchange-done", { userId, targetId }); // ให้คนส่งได้ด้วย
     socket.to(targetId).emit("exchange-done", { userId, targetId }); // ให้เป้าหมายด้วย
   });
 
-
-
-
   socket.on("disconnect", () => {
-    console.log("❌ Client disconnected:", socket.id);
+    console.log("Client disconnected:", socket.id);
   });
 });
 
+// ====== Item Delete ======
+app.delete("/items/:id", async (req, res) => {
+  try {
+    await Item.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Item deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete item" });
+  }
+});
 
+// ====== START SERVER ======
 const PORT = 5001;
 server.listen(PORT, () => {
-  console.log(`🚀 Server + Socket.IO running on http://localhost:${PORT}`);
+  console.log(`Server + Socket.IO running on http://localhost:${PORT}`);
 });

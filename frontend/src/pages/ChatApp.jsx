@@ -48,7 +48,7 @@ function ChatApp({ currentUserId, chattingWithId }) {
           if (data2.itemId) setConfirmedItem2(data2.itemId);
         }
       } catch (err) {
-        console.error("❌ fetchConfirmed error:", err);
+        console.error("fetchConfirmed error:", err);
       }
     };
 
@@ -103,7 +103,7 @@ function ChatApp({ currentUserId, chattingWithId }) {
         (userId === currentUserId && targetId === chattingWithId) ||
         (userId === chattingWithId && targetId === currentUserId)
       ) {
-        alert("✅ แลกเปลี่ยนสำเร็จแล้ว!");
+        alert("แลกเปลี่ยนสำเร็จแล้ว!");
         setExchangeConfirm1(false);
         setExchangeConfirm2(false);
         setConfirmedItem1(null);
@@ -156,7 +156,7 @@ function ChatApp({ currentUserId, chattingWithId }) {
       });
       socket.emit("selected-item", { userId: currentUserId, itemId: selectedItem1 });
     } catch (err) {
-      console.error("❌ Error confirming item:", err);
+      console.error("Error confirming item:", err);
     }
   };
 
@@ -196,7 +196,7 @@ function ChatApp({ currentUserId, chattingWithId }) {
       setUser2Items((prev) => prev.filter((i) => i._id !== confirmedItem2));
     } catch (err) {
       console.error(err);
-      alert("❌ เกิดข้อผิดพลาดในการแลกเปลี่ยน");
+      alert("เกิดข้อผิดพลาดในการแลกเปลี่ยน");
     }
   };
 
@@ -206,7 +206,7 @@ function ChatApp({ currentUserId, chattingWithId }) {
       const data = await res.json();
       setUser2Items(data);
     } catch (err) {
-      console.error("❌ Failed to refetch other user items:", err);
+      console.error("Failed to refetch other user items:", err);
     }
   };
   return(
@@ -237,7 +237,7 @@ function ChatApp({ currentUserId, chattingWithId }) {
           padding: "16px 24px",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between", // 👈 สำคัญ! ทำให้ซ้าย-ขวาห่างกัน
+          justifyContent: "space-between", // สำคัญ! ทำให้ซ้าย-ขวาห่างกัน
           borderBottom: "1px solid #444"
         }}>
           {/* ซ้าย: โปรไฟล์ + ชื่อ */}
@@ -345,7 +345,7 @@ function ChatApp({ currentUserId, chattingWithId }) {
 
         {/* Exchange Panel */}
         <div style={{ padding: 20, backgroundColor: "#1e1e1e", borderTop: "1px solid #333" }}>
-          <h4 style={{ marginBottom: 10 }}>📦 เลือก item ของฉัน</h4>
+          <h4 style={{ marginBottom: 10 }}>เลือก item ของฉัน</h4>
           <div style={{ display: "flex", gap: 10 }}>
             <select
               value={selectedItem1 || ""}
@@ -374,17 +374,17 @@ function ChatApp({ currentUserId, chattingWithId }) {
                 fontWeight: "bold",
                 cursor: "pointer",
               }}>
-                {hasClickedConfirm ? "✅ เรียบร้อย!" : "✅ ยืนยัน"}
+                {hasClickedConfirm ? "เรียบร้อย!" : "ยืนยัน"}
               </button>
             )}
           </div>
 
-          <h4 style={{ marginTop: 20 }}>🎁 item ของอีกฝ่าย</h4>
+          <h4 style={{ marginTop: 20 }}>item ของอีกฝ่าย</h4>
           <div style={{ backgroundColor: "#2c2c2c", padding: 10, borderRadius: 6 }}>
             {confirmedItem2 ? (
-              <p>🕵️ อีกฝ่ายเลือก: <strong>{user2Items.find((i) => i._id === confirmedItem2)?.title || "ไม่พบ item"}</strong></p>
+              <p>อีกฝ่ายเลือก: <strong>{user2Items.find((i) => i._id === confirmedItem2)?.title || "ไม่พบ item"}</strong></p>
             ) : (
-              <p>⏳ รออีกฝ่ายเลือก item</p>
+              <p>รออีกฝ่ายเลือก item</p>
             )}
           </div>
 
@@ -403,7 +403,7 @@ function ChatApp({ currentUserId, chattingWithId }) {
               cursor: "pointer",
             }}
           >
-            {exchangeConfirm1 ? "❌ ยกเลิกการแลกเปลี่ยน" : "✅ ยืนยันการแลกเปลี่ยน"} (
+            {exchangeConfirm1 ? "ยกเลิกการแลกเปลี่ยน" : "ยืนยันการแลกเปลี่ยน"} (
             {(exchangeConfirm1 ? 1 : 0) + (exchangeConfirm2 ? 1 : 0)}/2)
           </button>
         </div>
