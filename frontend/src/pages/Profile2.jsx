@@ -75,7 +75,7 @@ function Profile2() {
         if (Array.isArray(data.followers)) {
           setIsFollowing(data.followers.includes(loggedInUserId));
         } else if (typeof data.followers === "number") {
-          setIsFollowing(data.followers > 0); // หรือปรับตาม logic ของคุณ
+          setIsFollowing(false);   // หรือปรับตาม logic ของคุณ
         } else {
           console.warn("⚠️ followers is not an array or number:", data.followers);
           setIsFollowing(false);

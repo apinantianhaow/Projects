@@ -6,7 +6,7 @@ import Laurel from "../assets/images/Laurel2.jpg";
 import Icon from "../assets/icons/Add_circle.png";
 import { IoBookOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
-import PostprofileuserId from "../components/PostprofileuserId";
+import PostprofileuserId from "../components/PostprofileuserId"; 
 
 function Profile() {
   const navigate = useNavigate();

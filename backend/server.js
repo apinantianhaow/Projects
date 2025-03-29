@@ -180,9 +180,8 @@ app.get("/profile/:userId", async (req, res) => {
       following: profile.following,
       trades: profile.trades,
       imageUrl: profile.image
-        ? `data:${
-            profile.image.contentType
-          };base64,${profile.image.data.toString("base64")}`
+        ? `data:${profile.image.contentType
+        };base64,${profile.image.data.toString("base64")}`
         : null,
     });
   } catch (err) {
@@ -251,11 +250,11 @@ app.get("/items", async (req, res) => {
       slug: item.slug,
       images: item.images
         ? item.images
-            .filter((img) => img?.data) // 🔍 กรองค่าที่ไม่มี `data`
-            .map(
-              (img) =>
-                `data:${img.contentType};base64,${img.data.toString("base64")}`
-            )
+          .filter((img) => img?.data) // 🔍 กรองค่าที่ไม่มี `data`
+          .map(
+            (img) =>
+              `data:${img.contentType};base64,${img.data.toString("base64")}`
+          )
         : [], // ถ้าไม่มี images ให้ส่ง array ว่าง
     }));
 
@@ -318,7 +317,7 @@ app.post("/reset-password", async (req, res) => {
   }
 });
 
- // chat
+// chat
 app.post("/select-item", async (req, res) => {
   try {
     const { userId, itemId } = req.body;
@@ -410,6 +409,16 @@ app.delete("/delete-item/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to delete item" });
   }
 });
+app.get("/api/item-count/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const count = await Item.countDocuments({ uploadedBy: userId });
+    res.json({ count });
+  } catch (error) {
+    console.error("Count error:", error);
+    res.status(500).json({ error: "Failed to count items" });
+  }
+});
 
 app.put("/items/:id", upload.array("images"), async (req, res) => {
   try {
@@ -491,6 +500,7 @@ app.get("/items/:category/:titleSlug", async (req, res) => {
       ...item._doc,
       images: imageList,
       uploadedBy: {
+        userId: item.uploadedBy.toString(),
         username: profile?.username || "Unknown",
         imageUrl: profile?.image
           ? `data:${profile.image.contentType};base64,${profile.image.data.toString("base64")}`
@@ -505,6 +515,40 @@ app.get("/items/:category/:titleSlug", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+app.get("/items/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    console.log("user", userId);
+
+    if (!mongoose.isValidObjectId(userId)) {
+      return res.status(400).json({ error: "Invalid userId" });
+    }
+
+    const items = await Item.find({ uploadedBy: userId });
+    console.log("items", items);
+
+    const formattedItems = items.map((item) => ({
+      _id: item._id,
+      category: item.category,
+      title: item.title,
+      slug: item.slug,
+      images: item.images
+        ? item.images
+            .filter((img) => img?.data)
+            .map(
+              (img) =>
+                `data:${img.contentType};base64,${img.data.toString("base64")}`
+            )
+        : [],
+    }));
+
+    res.status(200).json(formattedItems);
+  } catch (err) {
+    console.error("Fetch error:", err);
+    res.status(500).json({ error: "Failed to fetch items" });
+  }
+});
+
 
 app.post("/addfollow", async (req, res) => {
   try {
